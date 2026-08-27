@@ -22,11 +22,26 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 
+from django.db import connection
+
 from .forms import ReportSubmissionForm
 from .models import Lift, Incident, Contractor
 from .predictor import predict_lift_health, EXPECTED_FEATURES, model as PREDICTIVE_MODEL
 from .serializers import LiftSerializer, IncidentSerializer, IncidentReportSerializer
 from .telegram_bot import send_telegram_message
+
+
+@csrf_exempt
+def healthz(request):
+    """Lightweight health check. Touches the DB so an external pinger keeps both
+    the web dyno and the Supabase compute warm. No auth, no side effects."""
+    try:
+        with connection.cursor() as cur:
+            cur.execute("SELECT 1")
+            cur.fetchone()
+        return JsonResponse({"status": "ok"})
+    except Exception as exc:  # pragma: no cover - diagnostics only
+        return JsonResponse({"status": "error", "detail": str(exc)}, status=503)
 
 # ==================================
 # ========== CONSTANTS =============

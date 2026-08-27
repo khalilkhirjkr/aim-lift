@@ -19,7 +19,7 @@ services:
       --workers 2
       --preload
       --timeout 120
-    healthCheckPath: /accounts/login/
+    healthCheckPath: /healthz/
     autoDeploy: true
     envVars:
       - key: PYTHON_VERSION

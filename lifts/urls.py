@@ -4,6 +4,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # Keep-alive / health check (used by external uptime pinger)
+    path('healthz/', views.healthz, name='healthz'),
+
     # Dashboards
     path('', views.incident_list, name='incident_list'),
     path('contractor/', views.contractor_dashboard, name='contractor_dashboard'),
