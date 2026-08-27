@@ -1,0 +1,47 @@
+# Render Blueprint. Repo root = this folder (App/AIMLift).
+# Dashboard: New + -> Blueprint -> connect the repo -> Render reads this file.
+# After first deploy, fill the env vars marked "sync: false" in the service settings.
+
+services:
+  - type: web
+    name: aim-lift
+    runtime: python
+    plan: free
+    region: singapore
+    branch: main
+    buildCommand: >-
+      pip install -r requirements.txt &&
+      python manage.py collectstatic --noinput &&
+      python manage.py migrate --noinput
+    startCommand: >-
+      gunicorn lift_monitor.wsgi:application
+      --bind 0.0.0.0:$PORT
+      --workers 2
+      --preload
+      --timeout 120
+    healthCheckPath: /accounts/login/
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.12"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: DJANGO_BEHIND_PROXY
+        value: "True"
+      # Paste the Supabase session-pooler connection string here (service -> Environment):
+      - key: DATABASE_URL
+        sync: false
+      # e.g. https://aim-lift.onrender.com
+      - key: DJANGO_CSRF_TRUSTED_ORIGINS
+        sync: false
+      # Origin(s) of the front-end that calls the API, comma-separated (optional)
+      - key: DJANGO_CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false

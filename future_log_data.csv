@@ -1,0 +1,4 @@
+timestamp,lift_identifier,air_temp_k,process_temp_k,rotational_speed_rpm,torque_nm,tool_wear_min,vibration,vertical_acceleration_mps2,acoustic_db,failure_type
+22-10-25 9:00,WP PMA 80271,301.2,310.5,1505,40.1,102,4.5,0.1,60.1,No Failure
+22-10-25 9:00,WP PMA 80271,301.3,310.6,1501,40.5,102,4.8,0.1,60.5,No Failure
+22-10-25 9:01,WP PMA 80271,298.9,310.1,1531,38.36,118.24,44.71,0.61,92,Random failure

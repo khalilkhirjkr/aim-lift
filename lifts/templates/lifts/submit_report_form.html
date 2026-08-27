@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incident Investigation Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; }
+        .report-header { font-family: 'Merriweather', serif; }
+        .report-table, .report-table th, .report-table td { border: 1px solid #9ca3af; }
+        .report-table th { background-color: #f3f4f6; padding: 0.75rem; text-align: left; font-size: 0.875rem; line-height: 1.25rem; font-weight: 700; }
+        .report-table td { padding: 0.75rem; vertical-align: top; }
+        .form-label { @apply block text-sm font-bold text-gray-700 mb-2; }
+        .form-textarea { @apply block w-full bg-gray-50 border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm; resize: vertical; }
+        .form-file-input { @apply block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none; }
+        .form-checkbox { @apply h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500; }
+    </style>
+</head>
+<body class="bg-gray-200">
+    <div class="container mx-auto my-12 max-w-5xl">
+        <div class="bg-white p-12 shadow-md">
+            <!-- Formal Report Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-3xl font-bold report-header text-gray-800">LIFT INCIDENT INVESTIGATION REPORT</h1>
+                <p class="text-md text-gray-500">Jabatan Kerja Raya Malaysia</p>
+            </div>
+            
+            {% if incident.report_requires_correction %}
+            <div class="bg-yellow-50 border border-yellow-300 text-yellow-800 p-4 mb-8 rounded-md" role="alert">
+                <p class="font-bold">Notice: Corrections Required</p>
+                <p class="text-sm">This report has been returned by JKR for correction. Please review all sections before resubmitting.</p>
+            </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <table class="w-full border-collapse report-table">
+                    <!-- Section A: Incident Details -->
+                    <thead>
+                        <tr><th colspan="2">A. INCIDENT DETAILS</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="w-1/3 font-semibold">Premise / Location</td>
+                            <td class="w-2/3">{{ incident.lift.premise_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Lift Identification No.</td>
+                            <td>{{ incident.lift.lift_identifier }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Date & Time of Incident</td>
+                            <td>{{ incident.timestamp|date:"d F Y, P" }}</td>
+                        </tr>
+                    </tbody>
+                    <!-- Section B: Incident Description -->
+                    <thead>
+                        <tr><th colspan="2">B. INCIDENT DESCRIPTION</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Symptom / Type of Incident</td>
+                            <td>{{ incident.incident_type }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Direct Cause of Incident</td>
+                            <td>{{ form.direct_cause }}</td>
+                        </tr>
+                    </tbody>
+                    <!-- Section C: Root Cause Analysis -->
+                    <thead>
+                        <tr><th colspan="2">C. ROOT CAUSE ANALYSIS (4M)</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Root Cause Analysis</td>
+                            <td class="space-y-4">
+                                <div><label class="form-label" for="{{ form.rc_machine.id_for_label }}">1. Machine (Equipment)</label>{{ form.rc_machine }}</div>
+                                <div><label class="form-label" for="{{ form.rc_method.id_for_label }}">2. Method</label>{{ form.rc_method }}</div>
+                                <div><label class="form-label" for="{{ form.rc_man.id_for_label }}">3. Man (Personnel)</label>{{ form.rc_man }}</div>
+                                <div><label class="form-label" for="{{ form.rc_material.id_for_label }}">4. Material</label>{{ form.rc_material }}</div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Supporting Documents / Proof for Root Cause</td>
+                            <td>
+                                {{ form.rc_proof }}
+                                {% if incident.rc_proof %}<p class="text-sm text-gray-500 mt-1">Current: <a href="{{ incident.rc_proof.url }}" target="_blank" class="text-blue-600 hover:underline">{{ incident.rc_proof.name|cut:"incident_proofs/" }}</a></p>{% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <!-- Section D: Rectification Works -->
+                    <thead>
+                        <tr><th colspan="2">D. RECTIFICATION WORKS</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="font-semibold">Corrective Action Taken</td>
+                            <td>{{ form.corrective_action }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Proof of Corrective Action</td>
+                            <td>
+                                {{ form.corrective_action_proof }}
+                                {% if incident.corrective_action_proof %}<p class="text-sm text-gray-500 mt-1">Current: <a href="{{ incident.corrective_action_proof.url }}" target="_blank" class="text-blue-600 hover:underline">{{ incident.corrective_action_proof.name|cut:"incident_proofs/" }}</a></p>{% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Permanent Action to Prevent Recurrence</td>
+                            <td>{{ form.permanent_action }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold">Proof of Permanent Action</td>
+                            <td>
+                                {{ form.permanent_action_proof }}
+                                {% if incident.permanent_action_proof %}<p class="text-sm text-gray-500 mt-1">Current: <a href="{{ incident.permanent_action_proof.url }}" target="_blank" class="text-blue-600 hover:underline">{{ incident.permanent_action_proof.name|cut:"incident_proofs/" }}</a></p>{% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                    <!-- Section E: Contractor Acknowledgement -->
+                    <thead>
+                        <tr><th colspan="2">E. CONTRACTOR ACKNOWLEDGEMENT</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="2">
+                                <div class="flex items-start p-2">
+                                    {{ form.contractor_acknowledgement }}
+                                    <label for="{{ form.contractor_acknowledgement.id_for_label }}" class="ml-3 block text-sm text-gray-900">By submitting this report, I hereby declare that the information provided is true and accurate to the best of my knowledge.</label>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="mt-12 pt-6 flex items-center justify-end gap-x-4">
+                    <a href="{% url 'contractor_dashboard' %}" class="text-gray-800 font-semibold py-2 px-4 rounded">
+                        Cancel
+                    </a>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded">
+                        Submit Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+

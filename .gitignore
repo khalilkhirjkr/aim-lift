@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+
+# Django
+db.sqlite3
+staticfiles/
+
+# Env / secrets
+.env
+
+# Uploaded media (served from Supabase Storage in prod)
+proofs/
+media/
+
+# Note: lift_failure_model.pkl / lift_failure_encoder.pkl ARE committed on purpose
+# (the app loads them at runtime).
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
