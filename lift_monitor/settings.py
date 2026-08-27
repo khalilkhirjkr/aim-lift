@@ -188,8 +188,13 @@ if env_bool('USE_SUPABASE_STORAGE'):
     AWS_STORAGE_BUCKET_NAME = os.environ.get('SUPABASE_S3_BUCKET', 'media')
     AWS_S3_ENDPOINT_URL = os.environ.get('SUPABASE_S3_ENDPOINT_URL')
     AWS_S3_REGION_NAME = os.environ.get('SUPABASE_S3_REGION', 'ap-southeast-1')
+    # Supabase's S3 gateway requires path-style addressing and SigV4.
+    AWS_S3_ADDRESSING_STYLE = 'path'
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
     AWS_S3_FILE_OVERWRITE = False
+    # Private bucket -> serve uploads via short-lived signed URLs.
     AWS_QUERYSTRING_AUTH = True
+    AWS_QUERYSTRING_EXPIRE = int(os.environ.get('SUPABASE_S3_URL_EXPIRE', '3600'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
