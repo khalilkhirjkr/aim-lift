@@ -34,14 +34,42 @@ from .telegram_bot import send_telegram_message
 @csrf_exempt
 def healthz(request):
     """Lightweight health check. Touches the DB so an external pinger keeps both
-    the web dyno and the Supabase compute warm. No auth, no side effects."""
+    the web dyno and the Supabase compute warm. No auth, no side effects.
+
+    Optional one-off storage self-test: GET ?selftest=<HEALTHZ_SELFTEST_TOKEN>
+    writes, reads back and deletes a tiny object in the default storage backend.
+    """
+    payload = {"status": "ok"}
     try:
         with connection.cursor() as cur:
             cur.execute("SELECT 1")
             cur.fetchone()
-        return JsonResponse({"status": "ok"})
     except Exception as exc:  # pragma: no cover - diagnostics only
         return JsonResponse({"status": "error", "detail": str(exc)}, status=503)
+
+    import os
+    token = os.environ.get("HEALTHZ_SELFTEST_TOKEN", "")
+    if token and request.GET.get("selftest") == token:
+        from django.core.files.base import ContentFile
+        from django.core.files.storage import default_storage
+        try:
+            name = default_storage.save("proofs/_selftest.txt", ContentFile(b"ok"))
+            exists = default_storage.exists(name)
+            url = default_storage.url(name)
+            default_storage.delete(name)
+            payload["storage"] = {
+                "backend": default_storage.__class__.__name__,
+                "wrote": name,
+                "exists": exists,
+                "url": url,
+            }
+        except Exception as exc:
+            payload["storage"] = {
+                "backend": default_storage.__class__.__name__,
+                "error": str(exc),
+            }
+
+    return JsonResponse(payload)
 
 # ==================================
 # ========== CONSTANTS =============
