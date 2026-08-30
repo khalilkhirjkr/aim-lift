@@ -27,7 +27,7 @@
   {% endif %}
 
   {% if latest_reading %}
-  <div class="grid-2">
+  <div class="grid-2 fill">
     <div class="col">
       <div class="health-status {% if prediction == 'No failure' %}ok{% elif prediction %}bad{% endif %}">
         <div class="k" style="font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);" data-ms="Status kesihatan (bacaan terkini)" data-en="Health status (latest reading)">Status kesihatan (bacaan terkini)</div>
@@ -67,7 +67,7 @@
 
     <section class="panel">
       <div class="panel-head"><h3 data-ms="Bacaan sensor terkini" data-en="Latest sensor readings">Bacaan sensor terkini</h3></div>
-      <div style="padding:16px;">
+      <div class="panel-scroll" style="padding:16px;">
         <div class="sensor-grid">
           {% for sensor in sensor_data %}
           {% if sensor.name != 'feature s3' %}

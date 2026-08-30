@@ -12,7 +12,7 @@
     </div>
   </div>
 
-  <div class="grid-2">
+  <div class="grid-2 fill">
     <section class="panel">
       <div class="panel-head"><h3 data-ms="Prestasi kontraktor (purata)" data-en="Contractor performance (average)">Prestasi kontraktor (purata)</h3></div>
       <div style="padding:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
@@ -30,7 +30,7 @@
 
     <section class="panel">
       <div class="panel-head"><h3 data-ms="Kebolehpercayaan lif (anggaran MTBF)" data-en="Lift reliability (estimated MTBF)">Kebolehpercayaan lif (anggaran MTBF)</h3></div>
-      <div style="padding:8px 16px 16px;">
+      <div class="panel-scroll" style="padding:8px 16px 16px;">
         {% if lift_reliability %}
         <ul class="rel-list">
           {% for lift_data in lift_reliability %}

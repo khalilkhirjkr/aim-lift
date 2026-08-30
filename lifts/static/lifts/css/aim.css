@@ -145,6 +145,34 @@ a { color: inherit; }
 .user .rl { font-size: 11px; color: var(--text-faint); }
 
 .content { padding: 26px 28px 40px; display: flex; flex-direction: column; gap: 22px; }
+
+/* ---------- fixed (non-scrolling) dashboard frame ---------- */
+body.app-fixed,
+body.app-fixed .shell,
+body.app-fixed .main { height: 100vh; overflow: hidden; }
+body.app-fixed .content { flex: 1; min-height: 0; overflow: hidden; padding-bottom: 26px; }
+/* the one region per page that fills the leftover space and scrolls internally */
+body.app-fixed .fill { flex: 1; min-height: 0; }
+body.app-fixed .grid-2.fill { grid-auto-rows: minmax(0, 1fr); align-items: stretch; }
+body.app-fixed .fill > * { min-height: 0; }
+body.app-fixed .fill.panel,
+body.app-fixed .grid-2.fill > .panel { display: flex; flex-direction: column; min-height: 0; }
+body.app-fixed .fill.panel > .panel-scroll,
+body.app-fixed .grid-2.fill > .panel > .panel-scroll { flex: 1; min-height: 0; max-height: none; }
+body.app-fixed .grid-2.fill > .col { min-height: 0; }
+body.app-fixed .grid-2.fill > .col > .panel { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+body.app-fixed .grid-2.fill > .col > .panel > .panel-scroll { flex: 1; min-height: 0; max-height: none; }
+body.app-fixed .grid-2.fill .map { flex: 1; height: auto; min-height: 200px; }
+
+/* report / document pages keep normal scrolling */
+body.app-scroll { min-height: 100vh; }
+
+@media (max-width: 860px) {
+  body.app-fixed,
+  body.app-fixed .shell,
+  body.app-fixed .main,
+  body.app-fixed .content { height: auto; overflow: visible; }
+}
 .page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .page-head h2 { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
 .page-head p { margin: 3px 0 0; color: var(--text-muted); font-size: 13px; }
