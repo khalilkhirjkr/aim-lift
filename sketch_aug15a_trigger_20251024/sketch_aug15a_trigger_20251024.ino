@@ -16,6 +16,9 @@
 // ==== FIXED (same for every unit) ====
 const char* serverUrl      = "https://aim-lift.onrender.com/api/iot/alert/";
 const char* statusCheckUrl = "https://aim-lift.onrender.com/api/iot/check_status/";
+const char* readingUrl     = "https://aim-lift.onrender.com/api/iot/reading/";
+// Must match IOT_DEVICE_KEY on the server (sent as the X-Device-Key header).
+const char* deviceKey      = "REPLACE_WITH_IOT_DEVICE_KEY";
 
 // Captive-portal access point shown when the device is unconfigured / offline.
 const char* setupApName = "AIM-Lift-Setup";
@@ -154,6 +157,56 @@ void sendAlert(String type, String status) {
   }
 }
 
+// ==== HELPER: SEND A SENSOR READING TO DJANGO ====
+// Replace the random values below with real sensor code once sensors are wired.
+// abnormal=true sends a fault-like reading (high vibration + acoustic) so the
+// predictive-maintenance model + incident flow can be exercised end to end.
+void sendReading(bool abnormal) {
+  if (WiFi.status() != WL_CONNECTED) { Serial.println("No WiFi."); return; }
+
+  float p1 = random(2970, 3010) / 10.0;      // control panel temp K
+  float p2 = random(3080, 3095) / 10.0;      // motor temp K
+  float p3 = random(1450, 1550);            // motor speed rpm
+  float s1 = random(35, 45);                // torque Nm
+  float s2 = random(10, 150);              // operational hours
+  float s3 = random(10, 80);
+  float vib  = abnormal ? random(200, 500) / 10.0 : random(1, 30) / 10.0;   // mm/s^2
+  float vacc = random(1, 15) / 100.0;                                        // m/s^2
+  float ac   = abnormal ? random(800, 1000) / 10.0 : random(550, 630) / 10.0; // dB
+
+  String payload = "{";
+  payload += "\"lift_id\":\"" + liftId + "\",";
+  payload += "\"device_id\":\"" + deviceId + "\",";
+  payload += "\"feature_p1\":" + String(p1, 2) + ",";
+  payload += "\"feature_p2\":" + String(p2, 2) + ",";
+  payload += "\"feature_p3\":" + String(p3, 2) + ",";
+  payload += "\"feature_s1\":" + String(s1, 2) + ",";
+  payload += "\"feature_s2\":" + String(s2, 2) + ",";
+  payload += "\"feature_s3\":" + String(s3, 2) + ",";
+  payload += "\"vibration\":" + String(vib, 2) + ",";
+  payload += "\"vertical_acceleration_mps2\":" + String(vacc, 3) + ",";
+  payload += "\"acoustic_db\":" + String(ac, 2);
+  payload += "}";
+
+  WiFiClientSecure client;
+  client.setInsecure();
+  HTTPClient http;
+  http.begin(client, readingUrl);
+  http.setConnectTimeout(15000);
+  http.setTimeout(60000);
+  http.addHeader("Content-Type", "application/json");
+  http.addHeader("X-Device-Key", deviceKey);
+
+  int code = http.POST(payload);
+  if (code > 0) {
+    Serial.printf("Reading sent (%s), Response: %d\n", abnormal ? "fault" : "normal", code);
+    Serial.println(http.getString());
+  } else {
+    Serial.printf("Reading failed, Error: %s\n", http.errorToString(code).c_str());
+  }
+  http.end();
+}
+
 // ==== HELPER: CHECK SERVER FOR COMMAND ====
 void checkServerForCommand() {
   if (WiFi.status() != WL_CONNECTED) return;
@@ -263,6 +316,8 @@ void setup() {
 // Serial test commands (type in Serial Monitor, no wiring needed):
 //   test    -> send a "Mantrap / Detected" alert
 //   attend  -> send a "Mantrap / Attended" alert
+//   read    -> send one NORMAL sensor reading   (POST /api/iot/reading/)
+//   fault   -> send one ABNORMAL sensor reading (triggers predictive-maintenance flow)
 //   info    -> print the active Device / Lift / Premise
 void handleSerialCommands() {
   if (!Serial.available()) return;
@@ -274,11 +329,17 @@ void handleSerialCommands() {
   } else if (cmd == "attend") {
     Serial.println(">> Sending test alert (Mantrap / Attended)...");
     sendAlert("Mantrap", "Attended");
+  } else if (cmd == "read") {
+    Serial.println(">> Sending NORMAL sensor reading...");
+    sendReading(false);
+  } else if (cmd == "fault") {
+    Serial.println(">> Sending ABNORMAL sensor reading...");
+    sendReading(true);
   } else if (cmd == "info") {
     Serial.printf("Device: %s | Lift: %s | Premise: %s\n",
                   deviceId.c_str(), liftId.c_str(), premiseName.c_str());
   } else if (cmd.length()) {
-    Serial.println(">> Unknown command. Use: test | attend | info");
+    Serial.println(">> Unknown command. Use: test | attend | read | fault | info");
   }
 }
 

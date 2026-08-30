@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.html import format_html
 from django.utils import timezone
 from datetime import timedelta
-from .models import Lift, Incident, Contractor
+from .models import Lift, Incident, Contractor, SensorReading
 
 @admin.register(Lift)
 class LiftAdmin(admin.ModelAdmin):
@@ -68,3 +68,12 @@ class IncidentAdmin(admin.ModelAdmin):
     review_report_button.short_description = 'Review'
 
 admin.site.register(Contractor)
+
+
+@admin.register(SensorReading)
+class SensorReadingAdmin(admin.ModelAdmin):
+    list_display = ('lift', 'created_at', 'prediction', 'confidence', 'vibration', 'acoustic_db', 'source', 'incident')
+    list_filter = ('source', 'prediction', 'lift__premise_name')
+    search_fields = ('lift__lift_identifier',)
+    date_hierarchy = 'created_at'
+    readonly_fields = ('created_at',)

@@ -1,13 +1,16 @@
 # lifts/views.py
 
+import os
 from datetime import datetime, timedelta
 from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Q, F, Subquery, OuterRef
 from django.http import Http404
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 import joblib
@@ -25,10 +28,137 @@ from rest_framework import status
 from django.db import connection
 
 from .forms import ReportSubmissionForm
-from .models import Lift, Incident, Contractor
+from .models import Lift, Incident, Contractor, SensorReading
 from .predictor import predict_lift_health, EXPECTED_FEATURES, model as PREDICTIVE_MODEL
 from .serializers import LiftSerializer, IncidentSerializer, IncidentReportSerializer
 from .telegram_bot import send_telegram_message
+
+
+# ==================================
+# ===== SENSOR READING PIPELINE ====
+# ==================================
+
+# How many recent readings to keep per lift (oldest are auto-deleted on ingest).
+READINGS_KEEP_PER_LIFT = int(os.environ.get('SENSOR_READINGS_KEEP', '200'))
+# Minimum model confidence (%) before a predicted-failure incident is opened.
+PREDICT_ALERT_CONFIDENCE = float(os.environ.get('PREDICT_ALERT_CONFIDENCE', '80'))
+
+# Named reading profiles for the test/inject tools. Values are (low, high) ranges.
+READING_PROFILES = {
+    'normal': {
+        'feature_p1': (297, 301), 'feature_p2': (308, 309.5), 'feature_p3': (1450, 1550),
+        'feature_s1': (35, 45), 'feature_s2': (10, 150), 'feature_s3': (10, 80),
+        'vibration': (0.1, 3.0), 'vertical_acceleration_mps2': (0.01, 0.15), 'acoustic_db': (55, 63),
+    },
+    'high_vibration': {'vibration': (20, 50)},
+    'high_acoustic': {'acoustic_db': (80, 100)},
+    'fault': {'vibration': (20, 50), 'acoustic_db': (80, 100)},
+}
+_NOT_A_FAILURE = {'No failure', 'Prediction Error', 'Model Not Loaded', 'Encoder Not Loaded'}
+
+
+def build_reading_values(profile='normal'):
+    """Return a dict of the 9 feature values for a named profile. Starts from
+    'normal' and overlays the chosen profile's ranges."""
+    ranges = dict(READING_PROFILES['normal'])
+    ranges.update(READING_PROFILES.get(profile, {}))
+    return {f: round(random.uniform(*ranges[f]), 4) for f in EXPECTED_FEATURES if f in ranges}
+
+
+def process_reading(lift, values, *, device_id='', source='device'):
+    """Core ingest: store the reading, run the model, open a predicted-failure
+    incident if warranted, then trim the per-lift rolling window.
+    Returns the saved SensorReading."""
+    reading = SensorReading(lift=lift, device_id=device_id or '', source=source)
+    for f in EXPECTED_FEATURES:
+        try:
+            setattr(reading, f, float(values.get(f, 0) or 0))
+        except (TypeError, ValueError):
+            setattr(reading, f, 0.0)
+
+    pred, conf = predict_lift_health(reading.feature_dict())
+    reading.prediction = pred or ''
+    try:
+        reading.confidence = round(float(conf) * 100, 2)
+    except (TypeError, ValueError):
+        reading.confidence = 0.0
+
+    if pred not in _NOT_A_FAILURE and reading.confidence >= PREDICT_ALERT_CONFIDENCE:
+        already_open = Incident.objects.filter(
+            lift=lift, status='Detected', incident_type__startswith='Predicted:'
+        ).exists()
+        if not already_open:
+            incident = Incident.objects.create(
+                lift=lift,
+                incident_type=f'Predicted: {pred}',
+                status='Detected',
+                is_emergency=True,
+            )
+            reading.incident = incident
+            send_telegram_message(
+                f"\U0001F52E *Predicted Lift Failure* \U0001F52E\n\n"
+                f"*Premise:* {lift.premise_name}\n"
+                f"*Lift ID:* {lift.lift_identifier}\n"
+                f"*Prediction:* {pred} ({reading.confidence:.1f}% confidence)\n"
+                f"*Vibration:* {reading.vibration:.2f} | *Acoustic:* {reading.acoustic_db:.2f} dB"
+            )
+
+    reading.save()
+
+    stale_ids = list(
+        SensorReading.objects.filter(lift=lift)
+        .order_by('-created_at')
+        .values_list('id', flat=True)[READINGS_KEEP_PER_LIFT:]
+    )
+    if stale_ids:
+        SensorReading.objects.filter(id__in=stale_ids).delete()
+
+    return reading
+
+
+@csrf_exempt
+def ingest_reading(request):
+    """POST /api/iot/reading/ — a lift's IoT unit submits a sensor reading.
+    Requires header  X-Device-Key: <IOT_DEVICE_KEY>."""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST only'}, status=405)
+
+    expected_key = os.environ.get('IOT_DEVICE_KEY', '')
+    if not expected_key or request.headers.get('X-Device-Key', '') != expected_key:
+        return JsonResponse({'error': 'unauthorized'}, status=401)
+
+    try:
+        data = json.loads(request.body or b'{}')
+    except (ValueError, TypeError):
+        return JsonResponse({'error': 'invalid JSON'}, status=400)
+
+    lift_id = data.get('lift_id')
+    try:
+        lift = Lift.objects.get(lift_identifier=lift_id)
+    except Lift.DoesNotExist:
+        return JsonResponse({'error': f'unknown lift_id {lift_id!r}'}, status=404)
+
+    reading = process_reading(lift, data, device_id=data.get('device_id', ''), source='device')
+    return JsonResponse({
+        'status': 'ok',
+        'prediction': reading.prediction,
+        'confidence': reading.confidence,
+        'incident_opened': reading.incident_id is not None,
+    }, status=201)
+
+
+@staff_member_required
+def inject_test_reading(request):
+    """Staff-only QA tool: submit a reading through the real pipeline using a
+    named profile. POST { lift_id, profile }."""
+    if request.method != 'POST':
+        return redirect('lift_health')
+    lift = get_object_or_404(Lift, id=request.POST.get('lift_id'))
+    profile = request.POST.get('profile', 'normal')
+    if profile not in READING_PROFILES:
+        profile = 'normal'
+    process_reading(lift, build_reading_values(profile), device_id='TEST-INJECT', source='test')
+    return redirect(f"{reverse('lift_health')}?lift_id={lift.id}")
 
 
 def landing(request):
@@ -178,164 +308,50 @@ def contractor_dashboard(request):
 # --- Lift Health View (Alert check removed) ---
 @login_required
 def lift_health_dashboard(request):
-    all_lifts = Lift.objects.all()
+    all_lifts = Lift.objects.all().order_by('lift_identifier')
     selected_lift_id = request.GET.get('lift_id')
     selected_lift = None
-    prediction_error = None # Variable to hold error messages
-
-    # Determine which lift to display
     if selected_lift_id:
         selected_lift = get_object_or_404(Lift, id=selected_lift_id)
     elif all_lifts:
-        selected_lift = all_lifts.first() # Default to first lift if none selected
+        selected_lift = all_lifts.first()
 
     prediction = None
     confidence = 0
+    prediction_error = None
     sensor_data_with_thresholds = []
+    latest_reading = None
+    recent_readings = []
 
     if selected_lift:
-        # --- Simulate Sensor Data ---
-        latest_incident = Incident.objects.filter(lift=selected_lift, status='Detected').order_by('-timestamp').first()
+        latest_reading = SensorReading.objects.filter(lift=selected_lift).order_by('-created_at').first()
+        recent_readings = list(SensorReading.objects.filter(lift=selected_lift).order_by('-created_at')[:20])
 
-        # Generate base normal readings - Using TIGHTER, MORE CONSERVATIVE ranges
-        latest_readings_raw = {
-            'feature_p1': np.random.uniform(297, 301),  # Tighter Air Temp K
-            'feature_p2': np.random.uniform(308, 309.5), # Tighter Process Temp K
-            'feature_p3': np.random.uniform(1450, 1550), # Tighter Rotational Speed
-            'feature_s1': np.random.uniform(35, 45),    # Tighter Torque Nm
-            'feature_s2': np.random.uniform(10, 150),   # Lower max Tool Wear
-            'feature_s3': np.random.uniform(10, 80),    # Tighter Example range
-            'vibration': np.random.uniform(0.1, 3.0),   # Lower max Vibration
-            'vertical_acceleration_mps2': np.random.uniform(0.01, 0.15), # Lower max Accel
-            'acoustic_db': np.random.uniform(55, 63),   # Tighter Acoustic
-        }
-
-        # Ensure all features expected by the model are present
-        for feature in EXPECTED_FEATURES:
-            if feature not in latest_readings_raw:
-                latest_readings_raw[feature] = 0.0
-
-        # Simulate abnormal readings if needed (Matches dataset_generator pattern)
-        simulate_failure_condition = random.choice([True, False, False, False])
-        if latest_incident or simulate_failure_condition:
-             latest_readings_raw['vibration'] = np.random.uniform(20, 50)   # Matches generator
-             latest_readings_raw['acoustic_db'] = np.random.uniform(80, 100) # Matches generator
-
-             # Comment these out to match the training data pattern
-             # latest_readings_raw['feature_p2'] = np.random.uniform(315, 320)
-             # latest_readings_raw['feature_s1'] = np.random.uniform(80, 100)
-
-             print(f"--- Simulating CLEAR failure readings (Matching Generator Pattern) for lift {selected_lift.lift_identifier} ---")
-
-
-        # --- Prepare data structure for template ---
-        sensor_data_with_thresholds = [] # Reset list for current prediction
-        for key, value in latest_readings_raw.items():
-            if key in EXPECTED_FEATURES:
-                threshold_key = key.replace('_', ' ') # Format key for display
-                threshold = SENSOR_THRESHOLDS.get(threshold_key)
+        if latest_reading:
+            prediction = latest_reading.prediction or None
+            confidence = latest_reading.confidence
+            for feature in EXPECTED_FEATURES:
+                threshold = SENSOR_THRESHOLDS.get(feature.replace('_', ' '))
                 if threshold:
                     sensor_data_with_thresholds.append({
-                        'name': threshold_key,
-                        'value': value,
+                        'name': feature.replace('_', ' '),
+                        'value': getattr(latest_reading, feature),
                         'min': threshold['min'],
-                        'max': threshold['max']
+                        'max': threshold['max'],
                     })
-        print("--- Sensor values BEFORE prediction ---")
-        print(latest_readings_raw)
-
-        # --- Make Prediction ---
-        try:
-            if PREDICTIVE_MODEL is None:
-                 prediction = "Model Not Loaded"
-                 confidence = 0
-                 prediction_error = "Predictive model file could not be loaded. Check server startup logs."
-            else:
-                pred_output, conf_val = predict_lift_health(latest_readings_raw)
-
-                if pred_output == "Prediction Error":
-                     prediction = "Prediction Error"
-                     confidence = 0
-                     prediction_error = "An error occurred during prediction. Check server logs."
-                else:
-                    prediction = pred_output.strip() # Clean potential whitespace
-                    confidence = conf_val * 100
-
-            # ==========================================================
-            # ========== START: Predictive Alert Handling (MODIFIED) ===
-            # ==========================================================
-            # This block now ONLY prints if a failure is predicted by the dashboard view.
-            # It NO LONGER creates incidents or sends alerts automatically.
-            if prediction not in ['No failure', 'Prediction Error', 'Model Not Loaded'] and confidence > 80: # Alert threshold
-                print(f"--- Potential Failure Predicted by Dashboard View: {prediction} with {confidence:.2f}% confidence ---")
-
-                # incident_type_str = f"Predicted: {prediction}" # No longer needed here
-
-                # print(f"--- Creating new predictive incident and sending Telegram alert ---") # No longer needed here
-
-                # --- All the code below is now commented out ---
-                # # Create a new incident log every time for demonstration purposes
-                # Incident.objects.create(
-                #     lift=selected_lift,
-                #     incident_type=incident_type_str,
-                #     status='Detected',
-                #     is_emergency=True
-                # )
-                #
-                # # --- Build the detailed sensor reading string ---
-                # abnormal_readings_details = ""
-                # for sensor_info in sensor_data_with_thresholds:
-                #     s_name = sensor_info['name']
-                #     s_value = sensor_info['value']
-                #     s_min = sensor_info['min']
-                #     s_max = sensor_info['max']
-                #     is_abnormal = False
-                #     try:
-                #         if (isinstance(s_min, (int, float)) and float(s_value) < s_min): is_abnormal = True
-                #         if (isinstance(s_max, (int, float)) and float(s_value) > s_max): is_abnormal = True
-                #     except (ValueError, TypeError): is_abnormal = False
-                #
-                #     if is_abnormal:
-                #         abnormal_readings_details += (
-                #             f"- {s_name.title()}: {s_value:.2f} *(Not Normal)*\n"
-                #             f"  (Normal: {s_min} - {s_max})\n"
-                #         )
-                #
-                # # --- Construct the final Telegram message ---
-                # message = (
-                #     f"⚠️ *Predictive Maintenance Alert* ⚠️\n\n"
-                #     f"*Lift:* {selected_lift.lift_identifier}\n"
-                #     f"*Premise:* {selected_lift.premise_name}\n"
-                #     f"*Predicted Failure:* {prediction}\n"
-                #     f"*Confidence:* {confidence:.2f}%\n\n"
-                # )
-                # if abnormal_readings_details:
-                #     message += f"*Detail of Abnormal Sensor Readings:*\n{abnormal_readings_details}\n"
-                # message += f"An inspection is recommended."
-                #
-                # # --- Send the message ---
-                # send_telegram_message(message)
-                # --- End of commented out block ---
-
-            # ==========================================================
-            # ========== END: Predictive Alert Handling (MODIFIED) =====
-            # ==========================================================
-
-        except Exception as e:
-            # Catch unexpected errors during the whole prediction block
-            error_msg = f"Unexpected error in health dashboard view prediction block: {e}"
-            print(f"[ERROR] {error_msg}")
-            prediction = "View Error"
-            prediction_error = error_msg
-            confidence = 0
+            if prediction in ('Model Not Loaded', 'Encoder Not Loaded'):
+                prediction_error = "Predictive model could not be loaded on the server."
 
     context = {
         'all_lifts': all_lifts,
         'selected_lift': selected_lift,
+        'latest_reading': latest_reading,
+        'recent_readings': recent_readings,
         'prediction': prediction,
         'confidence': confidence,
-        'sensor_data': sensor_data_with_thresholds, # Pass the list of dicts
-        'prediction_error': prediction_error, # Pass the error message
+        'sensor_data': sensor_data_with_thresholds,
+        'prediction_error': prediction_error,
+        'reading_profiles': list(READING_PROFILES.keys()),
     }
     return render(request, 'lifts/lift_health.html', context)
 

@@ -6,19 +6,18 @@
 
 {% block content %}
   <section class="panel">
-    <div class="panel-head"><h3 data-ms="Pilih lif untuk ramalan" data-en="Select a lift to predict">Pilih lif untuk ramalan</h3></div>
+    <div class="panel-head"><h3 data-ms="Pilih lif" data-en="Select a lift">Pilih lif</h3></div>
     <div style="padding:16px;">
       <form method="GET" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
         <div class="form-field" style="flex:1; min-width:240px;">
           <label for="lift_select" data-ms="Lif" data-en="Lift">Lif</label>
-          <select id="lift_select" name="lift_id" class="form-select">
+          <select id="lift_select" name="lift_id" class="form-select" onchange="this.form.submit()">
             {% for lift in all_lifts %}
               <option value="{{ lift.id }}" {% if lift.id == selected_lift.id %}selected{% endif %}>{{ lift.lift_identifier }} &mdash; {{ lift.premise_name }}</option>
             {% endfor %}
           </select>
         </div>
-        <button type="submit" class="btn" data-ms="Ramal kesihatan" data-en="Predict health">Ramal kesihatan</button>
-        <a href="{% url 'load_future_data' %}" class="btn ghost" data-ms="Muat data simulasi" data-en="Load simulation data">Muat data simulasi</a>
+        <button type="submit" class="btn" data-ms="Lihat" data-en="View">Lihat</button>
       </form>
     </div>
   </section>
@@ -27,24 +26,47 @@
   <div class="notice bad">{{ prediction_error }}</div>
   {% endif %}
 
-  {% if prediction %}
+  {% if latest_reading %}
   <div class="grid-2">
     <div class="col">
-      <div class="health-status {% if prediction == 'No failure' %}ok{% else %}bad{% endif %}">
-        <div class="k" style="font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);" data-ms="Status kesihatan semasa" data-en="Current health status">Status kesihatan semasa</div>
+      <div class="health-status {% if prediction == 'No failure' %}ok{% elif prediction %}bad{% endif %}">
+        <div class="k" style="font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--text-muted);" data-ms="Status kesihatan (bacaan terkini)" data-en="Health status (latest reading)">Status kesihatan (bacaan terkini)</div>
         <div class="hv">
           {% if prediction == 'No failure' %}<span data-ms="Operasi normal" data-en="Normal operation">Operasi normal</span>
-          {% else %}<span data-ms="Amaran kerosakan" data-en="Failure warning">Amaran kerosakan</span>{% endif %}
+          {% elif prediction %}<span data-ms="Amaran kerosakan" data-en="Failure warning">Amaran kerosakan</span>
+          {% else %}<span data-ms="Belum dinilai" data-en="Not evaluated">Belum dinilai</span>{% endif %}
         </div>
         <div class="hm">
-          <span data-ms="Ramalan:" data-en="Predicted:">Ramalan:</span> <strong>{{ prediction }}</strong><br>
-          <span data-ms="Keyakinan:" data-en="Confidence:">Keyakinan:</span> <strong>{{ confidence|floatformat:1 }}%</strong>
+          {% if prediction %}<span data-ms="Ramalan:" data-en="Predicted:">Ramalan:</span> <strong>{{ prediction }}</strong> &middot; {{ confidence|floatformat:1 }}%<br>{% endif %}
+          <span data-ms="Bacaan pada" data-en="Reading at">Bacaan pada</span> {{ latest_reading.created_at|date:"d M Y, H:i" }}
+          <span class="premise">({{ latest_reading.source }})</span>
+          {% if latest_reading.incident_id %}<br><a class="filelink" href="{% url 'incident_list' %}" data-ms="Insiden ramalan dibuka" data-en="Predicted incident opened">Insiden ramalan dibuka</a>{% endif %}
         </div>
       </div>
+
+      {% if user.is_staff %}
+      <section class="panel">
+        <div class="panel-head"><h3 style="color:var(--warning);" data-ms="UJIAN — suntik bacaan sensor" data-en="TEST — inject a sensor reading">UJIAN — suntik bacaan sensor</h3></div>
+        <div style="padding:16px;">
+          <p class="premise" style="margin:0 0 12px;" data-ms="Menghantar satu bacaan melalui saluran sebenar (model + insiden + Telegram). Untuk QA sahaja." data-en="Sends one reading through the real pipeline (model + incident + Telegram). QA only.">Menghantar satu bacaan melalui saluran sebenar (model + insiden + Telegram). Untuk QA sahaja.</p>
+          <form method="POST" action="{% url 'inject_test_reading' %}" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+            {% csrf_token %}
+            <input type="hidden" name="lift_id" value="{{ selected_lift.id }}">
+            <div class="form-field" style="min-width:180px;">
+              <label for="profile" data-ms="Profil" data-en="Profile">Profil</label>
+              <select id="profile" name="profile" class="form-select">
+                {% for p in reading_profiles %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn ghost" style="color:var(--warning); border-color:color-mix(in srgb, var(--warning) 40%, transparent);" data-ms="Suntik bacaan" data-en="Inject reading">Suntik bacaan</button>
+          </form>
+        </div>
+      </section>
+      {% endif %}
     </div>
 
     <section class="panel">
-      <div class="panel-head"><h3 data-ms="Bacaan sensor terkini (simulasi)" data-en="Latest sensor readings (simulated)">Bacaan sensor terkini (simulasi)</h3></div>
+      <div class="panel-head"><h3 data-ms="Bacaan sensor terkini" data-en="Latest sensor readings">Bacaan sensor terkini</h3></div>
       <div style="padding:16px;">
         <div class="sensor-grid">
           {% for sensor in sensor_data %}
@@ -69,6 +91,23 @@
         </div>
       </div>
     </section>
+  </div>
+
+  {% else %}
+  <div class="panel" style="padding:40px; text-align:center;">
+    <div style="font-size:32px;">📡</div>
+    <h3 style="margin-top:10px;" data-ms="Tiada bacaan sensor lagi" data-en="No sensor readings yet">Tiada bacaan sensor lagi</h3>
+    <p class="premise" style="max-width:44ch; margin:8px auto 0;" data-ms="Bacaan akan muncul di sini apabila unit IoT lif ini mula menghantar data ke /api/iot/reading/." data-en="Readings appear here once this lift's IoT unit starts sending data to /api/iot/reading/.">Bacaan akan muncul di sini apabila unit IoT lif ini mula menghantar data ke /api/iot/reading/.</p>
+    {% if user.is_staff and selected_lift %}
+    <form method="POST" action="{% url 'inject_test_reading' %}" style="margin-top:18px; display:inline-flex; gap:10px; align-items:center;">
+      {% csrf_token %}
+      <input type="hidden" name="lift_id" value="{{ selected_lift.id }}">
+      <select name="profile" class="form-select" style="width:auto;">
+        {% for p in reading_profiles %}<option value="{{ p }}">{{ p }}</option>{% endfor %}
+      </select>
+      <button type="submit" class="btn ghost" style="color:var(--warning); border-color:color-mix(in srgb, var(--warning) 40%, transparent);" data-ms="Suntik bacaan ujian" data-en="Inject test reading">Suntik bacaan ujian</button>
+    </form>
+    {% endif %}
   </div>
   {% endif %}
 {% endblock %}

@@ -19,6 +19,10 @@ urlpatterns = [
     # API endpoints for ESP32 (Alerts)
     path('api/iot/alert/', views.handle_alert, name='handle_alert'),
     path('api/iot/check_status/', views.check_status, name='check_status'),
+    path('api/iot/reading/', views.ingest_reading, name='ingest_reading'),
+
+    # Staff QA tool: inject a sensor reading through the real pipeline
+    path('health/inject/', views.inject_test_reading, name='inject_test_reading'),
     
     # Report Workflow
     path('report/submit/<int:incident_id>/', views.submit_report_form, name='submit_report'),
