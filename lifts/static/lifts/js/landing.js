@@ -73,18 +73,21 @@
 
   /* ---- pointer parallax on the hero stage ---- */
   var stage = document.getElementById("stage");
-  var lift = document.getElementById("lift");
+  var vid = document.querySelector(".stage-vid");
+  var lift = document.getElementById("lift");           // present only in the no-video version
   var mini = document.querySelector(".mini");
-  if (stage && lift && !reduce && window.matchMedia("(pointer:fine)").matches) {
+  var moveEl = lift || vid;
+  var baseT = lift ? "translate(-50%, -58%) " : "scale(1.18) translate(-2%, -5%) ";
+  if (stage && moveEl && !reduce && window.matchMedia("(pointer:fine)").matches) {
     stage.addEventListener("pointermove", function (e) {
       var r = stage.getBoundingClientRect();
       var px = (e.clientX - r.left) / r.width - 0.5;
       var py = (e.clientY - r.top) / r.height - 0.5;
-      lift.style.transform = "translate(-50%, -58%) translate(" + (px * 22) + "px," + (py * 16) + "px)";
+      moveEl.style.transform = baseT + "translate(" + (px * 14) + "px," + (py * 10) + "px)";
       if (mini) mini.style.transform = "translate(" + (px * -14) + "px," + (py * -10) + "px) rotateX(" + (py * -4) + "deg) rotateY(" + (px * 6) + "deg)";
     });
     stage.addEventListener("pointerleave", function () {
-      lift.style.transform = "";
+      moveEl.style.transform = "";
       if (mini) mini.style.transform = "";
     });
   }

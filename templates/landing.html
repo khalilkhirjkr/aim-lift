@@ -49,38 +49,10 @@
       <a class="btn ghost lg" href="#cara" data-ms="Tengok cara kerja" data-en="See how it works">Tengok cara kerja</a>
     </div>
 
-    {% comment %}
-      3D stage. To use a real video instead of the CSS object, replace the
-      <div class="lift"> ... </div> below with a <video> element:
-        <video autoplay muted loop playsinline
-               poster="{% static 'lifts/img/hero-poster.jpg' %}">
-          <source src="{% static 'lifts/img/hero.webm' %}" type="video/webm">
-          <source src="{% static 'lifts/img/hero.mp4' %}" type="video/mp4">
-        </video>
-    {% endcomment %}
     <div class="stage fade f4" id="stage">
-      <div class="ring"></div>
-      <div class="floorshadow"></div>
-      <div class="lift" id="lift">
-        <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <defs>
-            <linearGradient id="gTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B7ACFB"/><stop offset="1" stop-color="#8E7DF3"/></linearGradient>
-            <linearGradient id="gLeft" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7A69EE"/><stop offset="1" stop-color="#5B4CCB"/></linearGradient>
-            <linearGradient id="gRight" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#54E3AE"/><stop offset="1" stop-color="#2FBF8E"/></linearGradient>
-            <linearGradient id="gDoor" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6A5AE0"/><stop offset="1" stop-color="#4A3CB4"/></linearGradient>
-          </defs>
-          <path d="M100 12 L182 58 L100 104 L18 58 Z" fill="url(#gTop)"/>
-          <path d="M18 58 L100 104 L100 208 L18 162 Z" fill="url(#gLeft)"/>
-          <path d="M182 58 L100 104 L100 208 L182 162 Z" fill="url(#gRight)"/>
-          <path d="M59 81 L59 185 M100 104 L100 208" stroke="rgba(255,255,255,.35)" stroke-width="2"/>
-          <circle cx="150" cy="92" r="6" fill="#DFFFF3"/>
-          <circle cx="150" cy="92" r="12" fill="none" stroke="#DFFFF3" stroke-width="2" opacity=".5">
-            <animate attributeName="r" values="8;18;8" dur="2.4s" repeatCount="indefinite"/>
-            <animate attributeName="opacity" values=".6;0;.6" dur="2.4s" repeatCount="indefinite"/>
-          </circle>
-          <path d="M100 12 L182 58 L100 104 L18 58 Z" fill="#fff" opacity=".12"/>
-        </svg>
-      </div>
+      <video class="stage-vid" autoplay muted loop playsinline preload="auto">
+        <source src="{% static 'lifts/videos/hero-lift.mp4' %}" type="video/mp4">
+      </video>
 
       <div class="mini" aria-hidden="true">
         <div class="h"><span class="tag"><i></i> <span data-ms="LANGSUNG" data-en="LIVE">LANGSUNG</span></span><span class="mono">14:32</span></div>

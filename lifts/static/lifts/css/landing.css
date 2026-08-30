@@ -106,7 +106,21 @@ a { color: inherit; text-decoration: none; }
   background: linear-gradient(160deg, var(--sky-a), var(--sky-b) 55%, var(--sky-c));
   border: 1px solid var(--line); box-shadow: var(--shadow-soft);
 }
-.stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.stage .stage-vid {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
+  /* scale + shift so the generator watermark in the bottom-right corner is
+     pushed outside the clipped stage */
+  transform: scale(1.18) translate(-2%, -5%);
+  transform-origin: 34% 34%;
+}
+/* extra safety: fade the very bottom-right corner into the stage tint,
+   covering any generator watermark that survives the crop (sits under the card) */
+.stage::after {
+  content: ""; position: absolute; right: -2px; bottom: -2px; width: 150px; height: 96px;
+  background: radial-gradient(130% 130% at 100% 100%, var(--sky-c) 45%, transparent 78%);
+  pointer-events: none; z-index: 1;
+}
+.stage .mini { z-index: 2; }
 .stage .ring {
   position: absolute; left: 50%; bottom: 62px; width: 340px; height: 90px; transform: translateX(-50%);
   border-radius: 50%; background: radial-gradient(closest-side, color-mix(in srgb, var(--violet) 30%, transparent), transparent 75%);
