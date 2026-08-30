@@ -1096,69 +1096,47 @@ def view_report_api(request, incident_id):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def lift_health_view(request, pk):
-    """
-    Returns lift health data for both mobile and web dashboards.
-    Uses the same simulation + predictor logic as the web version.
-    """
-    from .models import Lift
-    from .predictor import predict_lift_health, EXPECTED_FEATURES
-    from rest_framework import status
-    import random
-    import datetime
+    """Lift health for the mobile app. Returns the latest REAL SensorReading for
+    the lift (no simulation). Response shape is kept backward-compatible."""
+    from rest_framework import status as drf_status
 
     lift = get_object_or_404(Lift, pk=pk)
-    
-    from collections import OrderedDict
-    try:
-        # --- Step 1: Generate simulated readings (float type only) ---
-        latest_readings_raw = OrderedDict([
-            ("Control Panel Temp (°K)", float(random.uniform(297, 301))),
-            ("Motor Temperature (°K)", float(random.uniform(308, 309.5))),
-            ("Motor Speed (RPM)", float(random.uniform(1450, 1550))),
-            ("Motor Torque (Nm)", float(random.uniform(35, 45))),
-            ("Operational Hours (h)", float(random.uniform(10, 150))),
-            ("Feature S3 Value", float(random.uniform(10, 80))),
-            ("Vibration", float(random.uniform(0.1, 3.0))),
-            ("Car Acceleration (m/s²)", float(random.uniform(0.01, 0.15))),
-            ("Acoustic Level (dB)", float(random.uniform(55, 63))),
-        ])
+    reading = SensorReading.objects.filter(lift=lift).order_by('-created_at').first()
 
-        # --- Step 2: Occasionally simulate failure ---
-        simulate_failure_condition = random.choice([True, False, False, False])
-        if simulate_failure_condition:
-            latest_readings_raw["Vibration (Mm/S²)"] = float(random.uniform(20, 50))
-            latest_readings_raw["Acoustic Level (dB)"] = float(random.uniform(80, 100))
+    base = {
+        "lift_id": lift.id,
+        "lift_identifier": lift.lift_identifier,
+        "premise": lift.premise_name,
+    }
 
-        # --- Step 3: Predict with your trained model ---
-        prediction, confidence = predict_lift_health(latest_readings_raw)
+    if reading is None:
+        base.update({
+            "has_data": False,
+            "status": "No Data",
+            "predicted": "-",
+            "confidence": 0.0,
+            "sensor_readings": {},
+            "timestamp": None,
+        })
+        return Response(base, status=drf_status.HTTP_200_OK)
 
-        # --- Step 4: Derive health status ---
-        health_status = (
-            "Normal Operation"
-            if prediction.lower() in ["no failure", "normal", "healthy"]
-            else "Failure Warning"
-        )
-
-        # --- Step 5: Construct clean JSON response ---
-        response_data = {
-            "lift_id": lift.id,
-            "lift_identifier": lift.lift_identifier,
-            "premise": lift.premise_name,
-            "status": health_status,
-            "predicted": prediction,
-            "confidence": round(confidence * 100, 2),
-            "sensor_readings": latest_readings_raw,
-            "timestamp": datetime.datetime.now().isoformat(),
-        }
-
-        return Response(response_data, status=status.HTTP_200_OK)
-
-    except Exception as e:
-        print(f"[ERROR] Health prediction failed: {e}")
-        return Response(
-            {"error": f"Health generation error: {str(e)}"},
-            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        )
+    is_ok = (reading.prediction or "").strip().lower() in ("no failure", "normal", "healthy", "")
+    labels = {
+        "feature_p1": "Control Panel Temp (°K)", "feature_p2": "Motor Temperature (°K)",
+        "feature_p3": "Motor Speed (RPM)", "feature_s1": "Motor Torque (Nm)",
+        "feature_s2": "Operational Hours (h)", "feature_s3": "Feature S3",
+        "vibration": "Vibration (mm/s²)", "vertical_acceleration_mps2": "Car Acceleration (m/s²)",
+        "acoustic_db": "Acoustic Level (dB)",
+    }
+    base.update({
+        "has_data": True,
+        "status": "Normal Operation" if is_ok else "Failure Warning",
+        "predicted": reading.prediction or "-",
+        "confidence": round(reading.confidence, 2),
+        "sensor_readings": {labels[f]: round(getattr(reading, f), 2) for f in SensorReading.FEATURES},
+        "timestamp": reading.created_at.isoformat(),
+    })
+    return Response(base, status=drf_status.HTTP_200_OK)
 
 #@api_view(['GET'])
 #@permission_classes([AllowAny])
