@@ -1,157 +1,79 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Incident Report - {{ incident.incident_type }}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f7fafc; } /* Light gray background */
-        .report-table, .report-table th, .report-table td { border: 1px solid #d1d5db; } /* Lighter border */
-        .report-table th { background-color: #f3f4f6; padding: 0.75rem; text-align: left; font-size: 0.875rem; line-height: 1.25rem; font-weight: 600; color: #374151; }
-        .report-table td { padding: 0.75rem; vertical-align: top; background-color: #ffffff; }
-        .report-table tr:nth-child(even) td { background-color: #f9fafb; } /* Zebra striping */
-        .section-header { text-lg font-bold text-gray-700 bg-gray-100 p-2 rounded-t-md mb-0 border border-gray-300 border-b-0 } /* Improved section header */
-    </style>
-</head>
-<body class="bg-gray-100">
-    <div class="max-w-4xl mx-auto p-8">
-        <div class="bg-white rounded-lg shadow-md overflow-hidden"> <div class="text-center p-6 border-b border-gray-200">
-                <h1 class="text-2xl font-bold text-gray-800">LIFT INCIDENT INVESTIGATION REPORT</h1>
-                <h2 class="text-lg font-semibold text-gray-600">Jabatan Kerja Raya Malaysia</h2>
-            </div>
+{% extends "base.html" %}
 
-            <div class="p-6 md:p-8 space-y-6"> <section>
-                    <h3 class="section-header">A. INCIDENT DETAILS</h3>
-                    <table class="w-full border-collapse report-table border-t-0 rounded-b-md"> <tbody>
-                            <tr>
-                                <td class="px-4 py-3 font-semibold border-r w-1/3">Premise / Location</td>
-                                <td class="px-4 py-3">{{ incident.lift.premise_name }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 font-semibold border-r">Lift Identification No.</td>
-                                <td class="px-4 py-3">{{ incident.lift.lift_identifier }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 font-semibold border-r">Date & Time of Incident</td>
-                                <td class="px-4 py-3">{{ incident.timestamp|date:"d F Y, P" }}</td>
-                            </tr>
-                             <tr>
-                                <td class="px-4 py-3 font-semibold border-r">Date & Time Attended</td>
-                                <td class="px-4 py-3">{{ incident.time_attended|date:"d F Y, P"|default:"N/A" }}</td>
-                            </tr>
-                             <tr>
-                                <td class="px-4 py-3 font-semibold border-r">Report Submission Date</td>
-                                <td class="px-4 py-3">{{ incident.report_submitted_at|date:"d F Y, P"|default:"N/A" }}</td>
-                            </tr>
-                             <tr>
-                                <td class="px-4 py-3 font-semibold border-r">Report Status</td>
-                                <td class="px-4 py-3 font-medium
-                                    {% if incident.status == 'Resolved' %}text-green-600{% elif incident.status == 'Correction Required' %}text-red-600{% else %}text-gray-700{% endif %}">
-                                    {{ incident.status }} {% if incident.report_acknowledged_by_jkr %}(JKR Approved){% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
+{% block title %}Lihat Laporan — AIM-Lift{% endblock %}
+{% block crumb %}<span data-ms="Tugasan Kontraktor" data-en="Contractor Tasks">Tugasan Kontraktor</span>{% endblock %}
+{% block page_title %}<span data-ms="Laporan Insiden" data-en="Incident Report">Laporan Insiden</span>{% endblock %}
 
-                <section>
-                    <h3 class="section-header">B. INCIDENT DESCRIPTION</h3>
-                    <table class="w-full border-collapse report-table border-t-0 rounded-b-md">
-                        <tbody>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r w-1/3">Symptom / Type of Incident</td>
-                                <td class="px-4 py-3">{{ incident.symptom|default:incident.incident_type }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r">Direct Cause of Incident</td>
-                                <td class="px-4 py-3">{{ incident.direct_cause|linebreaksbr|default:"N/A" }}</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-
-                <section>
-                    <h3 class="section-header">C. ROOT CAUSE ANALYSIS (4M)</h3>
-                    <table class="w-full border-collapse report-table border-t-0 rounded-b-md">
-                        <tbody>
-                            <tr><td class="px-4 py-3 align-top font-semibold border-r w-1/3">1. Machine (Equipment)</td><td class="px-4 py-3">{{ incident.rc_machine|linebreaksbr|default:"N/A" }}</td></tr>
-                            <tr><td class="px-4 py-3 align-top font-semibold border-r">2. Method</td><td class="px-4 py-3">{{ incident.rc_method|linebreaksbr|default:"N/A" }}</td></tr>
-                            <tr><td class="px-4 py-3 align-top font-semibold border-r">3. Man</td><td class="px-4 py-3">{{ incident.rc_man|linebreaksbr|default:"N/A" }}</td></tr>
-                            <tr><td class="px-4 py-3 align-top font-semibold border-r">4. Material</td><td class="px-4 py-3">{{ incident.rc_material|linebreaksbr|default:"N/A" }}</td></tr>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r">Supporting Documents / Proof for Root Cause</td>
-                                <td class="px-4 py-3">
-                                    {% if incident.rc_proof %}
-                                        <a href="{{ incident.rc_proof.url }}" target="_blank" class="text-blue-600 hover:underline">View File</a>
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-
-                <section>
-                    <h3 class="section-header">D. RECTIFICATION WORKS</h3>
-                    <table class="w-full border-collapse report-table border-t-0 rounded-b-md">
-                         <tbody>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r w-1/3">Corrective Action Taken</td>
-                                <td class="px-4 py-3">{{ incident.corrective_action|linebreaksbr|default:"N/A" }}</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r">Proof of Corrective Action</td>
-                                <td class="px-4 py-3">
-                                    {% if incident.corrective_action_proof %}
-                                        <a href="{{ incident.corrective_action_proof.url }}" target="_blank" class="text-blue-600 hover:underline">View File</a>
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r">Permanent Action to Prevent Recurrence</td>
-                                <td class="px-4 py-3">{{ incident.permanent_action|linebreaksbr|default:"N/A" }}</td>
-                            </tr>
-                             <tr>
-                                <td class="px-4 py-3 align-top font-semibold border-r">Proof of Permanent Action</td>
-                                <td class="px-4 py-3">
-                                    {% if incident.permanent_action_proof %}
-                                        <a href="{{ incident.permanent_action_proof.url }}" target="_blank" class="text-blue-600 hover:underline">View File</a>
-                                    {% else %}
-                                        N/A
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-
-                <section>
-                    <h3 class="section-header">E. CONTRACTOR ACKNOWLEDGEMENT</h3>
-                    <table class="w-full border-collapse report-table border-t-0 rounded-b-md">
-                        <tbody>
-                            <tr>
-                                <td class="px-4 py-3">
-                                    {% if incident.contractor_acknowledgement %}
-                                        <span class="text-green-600 font-semibold">Acknowledged by contractor during submission.</span>
-                                    {% else %}
-                                        <span class="text-gray-500">Not acknowledged by contractor during submission.</span>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </section>
-
-                 <div class="mt-8 pt-6 border-t flex justify-center">
-                     <a href="{% url 'contractor_dashboard' %}" class="px-6 py-2 bg-gray-600 text-white rounded-md text-sm font-medium hover:bg-gray-700">Back to Dashboard</a>
-                </div>
-
-            </div> </div>
+{% block content %}
+  <div class="doc panel">
+    <div class="doc-head">
+      <h2 data-ms="LAPORAN SIASATAN INSIDEN LIF" data-en="LIFT INCIDENT INVESTIGATION REPORT">LAPORAN SIASATAN INSIDEN LIF</h2>
+      <p>{{ incident.lift.lift_identifier }} &middot; {{ incident.lift.premise_name }}</p>
     </div>
-</body>
-</html>
+
+    <div class="doc-body">
+      <div class="doc-sec">
+        <h4 data-ms="A. Butiran Insiden" data-en="A. Incident Details">A. Butiran Insiden</h4>
+        <table class="rpt"><tbody>
+          <tr><td data-ms="Premis / Lokasi" data-en="Premise / Location">Premis / Lokasi</td><td>{{ incident.lift.premise_name }}</td></tr>
+          <tr><td data-ms="No. Pengenalan Lif" data-en="Lift Identification No.">No. Pengenalan Lif</td><td class="mono">{{ incident.lift.lift_identifier }}</td></tr>
+          <tr><td data-ms="Tarikh &amp; Masa Insiden" data-en="Date &amp; Time of Incident">Tarikh &amp; Masa Insiden</td><td>{{ incident.timestamp|date:"d F Y, H:i" }}</td></tr>
+          <tr><td data-ms="Tarikh &amp; Masa Dihadiri" data-en="Date &amp; Time Attended">Tarikh &amp; Masa Dihadiri</td><td>{{ incident.time_attended|date:"d F Y, H:i"|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="Tarikh Laporan Dihantar" data-en="Report Submission Date">Tarikh Laporan Dihantar</td><td>{{ incident.report_submitted_at|date:"d F Y, H:i"|default:"&mdash;" }}</td></tr>
+          <tr>
+            <td data-ms="Status Laporan" data-en="Report Status">Status Laporan</td>
+            <td style="font-weight:600; {% if incident.status == 'Resolved' %}color:var(--good);{% elif incident.status == 'Correction Required' %}color:var(--critical);{% endif %}">
+              {{ incident.status }}{% if incident.report_acknowledged_by_jkr %} <span data-ms="(Diluluskan)" data-en="(Approved)">(Diluluskan)</span>{% endif %}
+            </td>
+          </tr>
+        </tbody></table>
+      </div>
+
+      <div class="doc-sec">
+        <h4 data-ms="B. Penerangan Insiden" data-en="B. Incident Description">B. Penerangan Insiden</h4>
+        <table class="rpt"><tbody>
+          <tr><td data-ms="Simptom / Jenis Insiden" data-en="Symptom / Type">Simptom / Jenis Insiden</td><td>{{ incident.symptom|default:incident.incident_type }}</td></tr>
+          <tr><td data-ms="Punca Langsung Insiden" data-en="Direct Cause">Punca Langsung Insiden</td><td>{{ incident.direct_cause|linebreaksbr|default:"&mdash;" }}</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="doc-sec">
+        <h4 data-ms="C. Analisis Punca (4M)" data-en="C. Root Cause Analysis (4M)">C. Analisis Punca (4M)</h4>
+        <table class="rpt"><tbody>
+          <tr><td data-ms="1. Mesin (Peralatan)" data-en="1. Machine (Equipment)">1. Mesin (Peralatan)</td><td>{{ incident.rc_machine|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="2. Kaedah" data-en="2. Method">2. Kaedah</td><td>{{ incident.rc_method|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="3. Manusia" data-en="3. Man">3. Manusia</td><td>{{ incident.rc_man|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="4. Bahan" data-en="4. Material">4. Bahan</td><td>{{ incident.rc_material|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="Bukti Punca" data-en="Proof for Root Cause">Bukti Punca</td><td>{% if incident.rc_proof %}<a class="filelink" href="{{ incident.rc_proof.url }}" target="_blank" rel="noopener" data-ms="Lihat fail" data-en="View file">Lihat fail</a>{% else %}&mdash;{% endif %}</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="doc-sec">
+        <h4 data-ms="D. Kerja Pembetulan" data-en="D. Rectification Works">D. Kerja Pembetulan</h4>
+        <table class="rpt"><tbody>
+          <tr><td data-ms="Tindakan Pembetulan Diambil" data-en="Corrective Action Taken">Tindakan Pembetulan Diambil</td><td>{{ incident.corrective_action|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="Bukti Tindakan Pembetulan" data-en="Proof of Corrective Action">Bukti Tindakan Pembetulan</td><td>{% if incident.corrective_action_proof %}<a class="filelink" href="{{ incident.corrective_action_proof.url }}" target="_blank" rel="noopener" data-ms="Lihat fail" data-en="View file">Lihat fail</a>{% else %}&mdash;{% endif %}</td></tr>
+          <tr><td data-ms="Tindakan Kekal Cegah Berulang" data-en="Permanent Action to Prevent Recurrence">Tindakan Kekal Cegah Berulang</td><td>{{ incident.permanent_action|linebreaksbr|default:"&mdash;" }}</td></tr>
+          <tr><td data-ms="Bukti Tindakan Kekal" data-en="Proof of Permanent Action">Bukti Tindakan Kekal</td><td>{% if incident.permanent_action_proof %}<a class="filelink" href="{{ incident.permanent_action_proof.url }}" target="_blank" rel="noopener" data-ms="Lihat fail" data-en="View file">Lihat fail</a>{% else %}&mdash;{% endif %}</td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="doc-sec">
+        <h4 data-ms="E. Akuan Kontraktor" data-en="E. Contractor Acknowledgement">E. Akuan Kontraktor</h4>
+        <table class="rpt"><tbody>
+          <tr><td colspan="2" style="width:auto;">
+            {% if incident.contractor_acknowledgement %}
+              <span style="color:var(--good); font-weight:600;" data-ms="Diakui oleh kontraktor semasa penghantaran." data-en="Acknowledged by contractor during submission.">Diakui oleh kontraktor semasa penghantaran.</span>
+            {% else %}
+              <span class="premise" data-ms="Tidak diakui oleh kontraktor semasa penghantaran." data-en="Not acknowledged by contractor during submission.">Tidak diakui oleh kontraktor semasa penghantaran.</span>
+            {% endif %}
+          </td></tr>
+        </tbody></table>
+      </div>
+
+      <div class="form-actions" style="justify-content:center;">
+        <a class="btn ghost" href="{% url 'contractor_dashboard' %}" data-ms="Kembali ke dashboard" data-en="Back to dashboard">Kembali ke dashboard</a>
+      </div>
+    </div>
+  </div>
+{% endblock %}

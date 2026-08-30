@@ -1,180 +1,93 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AIM Lift - Contractor Dashboard</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body { font-family: 'Inter', sans-serif; background-color: #f9fafb; }
-        .sidebar-icon {
-            width: 48px; height: 48px; display: flex; align-items: center; justify-content: center;
-            border-radius: 12px; margin-bottom: 1rem; cursor: pointer; transition: background-color 0.2s;
-        }
-        .sidebar-icon:hover, .sidebar-icon.active { background-color: #374151; /* Darker gray */ }
-        .sidebar-icon svg { width: 24px; height: 24px; stroke: white; }
-        .card {
-            background-color: white; border-radius: 1rem; /* More rounded */
-            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-            min-height: 120px; /* Ensure cards have a minimum height */
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-        /* --- Styles for Scrollable Table --- */
-        .table-wrapper {
-             background-color: white;
-             border-radius: 0 0 0.5rem 0.5rem; /* Round bottom corners */
-             box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-             overflow: hidden; /* Prevent content spilling before scrolling */
-        }
-        .table-container {
-             /* Calculate max height: viewport height - approx height of elements outside the container */
-             /* Adjust the '320px' based on your header/KPI cards/margins */
-             max-height: calc(90vh - 320px);
-             overflow-y: auto; /* Enable vertical scroll */
-             overflow-x: auto; /* Enable horizontal scroll if table is too wide */
-        }
-        .table-container::-webkit-scrollbar { height: 8px; width: 8px; }
-        .table-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
-        .table-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        .table-container::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+{% extends "base.html" %}
 
-        table {
-            min-width: 900px; /* Minimum width for table content */
-            width: 100%; /* Ensure table tries to fill container */
-        }
-        thead th {
-            position: sticky; /* Make header sticky */
-            top: 0; /* Stick to the top of the scrolling container */
-            background-color: #f9fafb; /* Background for sticky header */
-            z-index: 10; /* Keep header above table body */
-             border-bottom: 1px solid #e5e7eb; /* Add border to sticky header */
-        }
-         /* --- End Styles for Scrollable Table --- */
-    </style>
-</head>
-<body class="text-gray-800">
-    <div class="flex h-screen">
-        <aside class="w-20 bg-gray-900 text-white p-4 flex flex-col items-center justify-between">
-            <div>
-                <div class="mb-10 font-bold text-xl tracking-wider">AIM</div>
-                <a href="{% url 'incident_list' %}" class="sidebar-icon" title="Incident Dashboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" /></svg>
-                </a>
-                <a href="{% url 'contractor_dashboard' %}" class="sidebar-icon active" title="Contractor Dashboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0-5.455-1.732l-6.818-6.818a1.5 1.5 0 0 0-2.122 2.122l6.818 6.818a9.38 9.38 0 0 0 5.455 1.732ZM19.5 10.5a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.828 12a4.5 4.5 0 0 0-6.364 0l-1.06 1.06a4.5 4.5 0 1 0 6.364-6.364l1.06-1.06A4.5 4.5 0 0 0 12 5.672V4.5a.75.75 0 1 0-1.5 0v1.172a4.5 4.5 0 0 0-6.364 6.364l-1.06 1.06a4.5 4.5 0 0 0 6.364 6.364l1.06-1.06a4.5 4.5 0 0 0 6.364 0l1.06 1.06a4.5 4.5 0 0 0 6.364-6.364l-1.06-1.06a4.5 4.5 0 0 0-6.364 0Z" />
-                    </svg>
-                </a>
-                </a>
-                <a href="{% url 'lift_health' %}" class="sidebar-icon" title="Lift Health Dashboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" /></svg>
-                </a>
-                <a href="{% url 'jkr_analytics_dashboard' %}" class="sidebar-icon" title="JKR Analytics">
-                {# --- Chart Bar Icon --- #}
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 0 1 3 19.875v-6.75ZM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V8.625ZM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 0 1-1.125-1.125V4.125Z" />
-                </svg>
-            </a>
-            </div>
-            <form id="logout-form" method="post" action="{% url 'logout' %}" style="margin: 0;">
-            {% csrf_token %}
-            <button type="submit" class="sidebar-icon" title="Logout">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.25 3H6.75A2.25 2.25 0 004.5 5.25v13.5A2.25 2.25 0 006.75 21h6.5A2.25 2.25 0 0015.75 18.75V15m-4.5-4.5l3 3m0 0l-3 3m3-3H9" /></svg>
-            </button>
-            {% comment %} ✅ Correct closing tag {% endcomment %}
-        </form>
-    </aside>
+{% block title %}Tugasan Kontraktor — AIM-Lift{% endblock %}
+{% block crumb %}<span data-ms="Pantau" data-en="Monitor">Pantau</span>{% endblock %}
+{% block page_title %}<span data-ms="Tugasan Kontraktor" data-en="Contractor Tasks">Tugasan Kontraktor</span>{% endblock %}
 
-        <main class="flex-1 flex flex-col p-8 overflow-y-auto"> <div class="flex justify-between items-center mb-10 flex-shrink-0"> <h1 class="text-3xl font-bold text-gray-900">Contractor Task Monitoring</h1>
-                 {# --- START: Updated User Info Display --- #}
-                 <div class="flex items-center">
-                    <div class="text-right mr-4"> {# Align text to the right #}
-                        <p class="font-semibold text-gray-800">{{ request.user.get_full_name }}</p>
-                        <p class="text-sm text-gray-500">{{ request.user.groups.first.name | default:"No Group Assigned" }}</p> {# Display group name #}
-                    </div>
-                    <img src="{% static 'images/man.png' %}" alt="User Avatar" class="w-12 h-12 rounded-full object-cover flex-shrink-0">
-                </div>
-                 {# --- END: Updated User Info Display --- #}
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 flex-shrink-0"> <div class="lg:col-span-2 card p-6 text-center">
-                    <p class="text-sm font-medium text-gray-500 mb-1">Report Submission On-Time</p>
-                    <p class="text-4xl font-bold text-indigo-600">{{ report_submission_kpi }}%</p>
-                </div>
-                <div class="lg:col-span-2 card p-6 text-center">
-                    <p class="text-sm font-medium text-gray-500 mb-1">Contractor Reliability (JKR Acknowledged)</p>
-                    <p class="text-4xl font-bold text-teal-600">{{ contractor_reliability_kpi }}%</p>
-                </div>
-            </div>
-
-            <div class="flex flex-col flex-grow min-h-0"> <h2 class="text-xl font-semibold p-6 bg-white rounded-t-lg shadow-md border-b flex-shrink-0">Incident Reports & Actions</h2>
-                 <div class="table-wrapper flex-grow min-h-0"> <div class="table-container"> <table class="w-full text-sm text-left text-gray-500">
-                            <thead class="text-xs text-gray-700 uppercase"> <tr>
-                                    <th scope="col" class="px-6 py-3">Type</th>
-                                    <th scope="col" class="px-6 py-3">Premise</th>
-                                    <th scope="col" class="px-6 py-3">Lift ID</th>
-                                    <th scope="col" class="px-6 py-3">Detected Time</th>
-                                    <th scope="col" class="px-6 py-3">Attended Time</th>
-                                    <th scope="col" class="px-6 py-3">Report Due</th>
-                                    <th scope="col" class="px-6 py-3">Status</th>
-                                    <th scope="col" class="px-6 py-3">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for incident in incidents %}
-                                    <tr class="bg-white border-b hover:bg-gray-50 align-middle">
-                                        <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">{{ incident.incident_type }}</td>
-                                        <td class="px-6 py-4">{{ incident.lift.premise_name }}</td>
-                                        <td class="px-6 py-4">{{ incident.lift.lift_identifier }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ incident.timestamp|date:"d-M-Y P" }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ incident.time_attended|date:"d-M-Y P"|default:"-" }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">{{ incident.report_due_date|date:"d-M-Y"|default:"-" }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {% if incident.status == 'Resolved' %}
-                                                <span class="px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 rounded-full">JKR Approved</span>
-                                            {% elif incident.status == 'Pending Review' %}
-                                                <span class="px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">Submitted</span>
-                                            {% elif incident.status == 'Attended' %}
-                                                <span class="px-2 py-1 text-xs font-semibold text-yellow-800 bg-yellow-100 rounded-full">Pending Submission</span>
-                                            {% elif incident.status == 'Correction Required' %}
-                                                 <span class="px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 rounded-full">Correction Required</span>
-                                            {% elif incident.status == 'Detected' %}
-                                                <span class="px-2 py-1 text-xs font-semibold text-orange-800 bg-orange-100 rounded-full">Detected</span>
-                                            {% else %}
-                                                <span class="px-2 py-1 text-xs font-semibold text-gray-800 bg-gray-100 rounded-full">{{ incident.status }}</span>
-                                            {% endif %}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            {% if incident.status == 'Attended' or incident.status == 'Correction Required' %}
-                                                <a href="{% url 'submit_report' incident.id %}" class="bg-blue-100 text-blue-700 hover:bg-blue-200 text-xs font-bold py-2 px-4 rounded-lg transition duration-300">
-                                                    {% if incident.status == 'Correction Required' %} Resubmit {% else %} Submit {% endif %} Report
-                                                </a>
-                                            {% elif incident.status == 'Pending Review' %}
-                                                <a href="{% url 'review_report' incident.id %}" class="bg-green-100 text-green-700 hover:bg-green-200 text-xs font-bold py-2 px-4 rounded-lg transition duration-300">
-                                                    Review Report
-                                                </a>
-                                            {% elif incident.status == 'Resolved' %}
-                                                <a href="{% url 'view_report' incident.id %}" class="bg-gray-100 text-gray-700 hover:bg-gray-200 text-xs font-bold py-2 px-4 rounded-lg transition duration-300">
-                                                    See Report
-                                                </a>
-                                            {% else %}
-                                                 {# For 'Detected' or other statuses, show nothing or '-' #}
-                                                 <span class="text-gray-400 font-medium">-</span>
-                                            {% endif %}
-                                        </td>
-                                    </tr>
-                                {% empty %}
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-4 text-center text-gray-500">No incidents recorded yet.</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div> </div> </div> </main>
+{% block content %}
+  <div class="page-head">
+    <div>
+      <h2 data-ms="Laporan &amp; tindakan insiden" data-en="Incident reports &amp; actions">Laporan &amp; tindakan insiden</h2>
+      <p>{{ incidents|length }} <span data-ms="rekod insiden" data-en="incident records">rekod insiden</span></p>
     </div>
-</body>
-</html>
+  </div>
+
+  <div class="stats" style="grid-template-columns:repeat(2,1fr)">
+    <div class="stat">
+      <div class="k" data-ms="Laporan dihantar tepat masa" data-en="On-time report submission">Laporan dihantar tepat masa</div>
+      <div class="v tnum">{{ report_submission_kpi }}<small>%</small></div>
+      <div class="row"><span class="delta flat" data-ms="Daripada laporan yang tertunggak" data-en="Of reports past due">Daripada laporan yang tertunggak</span></div>
+    </div>
+    <div class="stat">
+      <div class="k" data-ms="Kebolehpercayaan kontraktor" data-en="Contractor reliability">Kebolehpercayaan kontraktor</div>
+      <div class="v tnum">{{ contractor_reliability_kpi }}<small>%</small></div>
+      <div class="row"><span class="delta flat" data-ms="Laporan diluluskan pengurusan" data-en="Reports approved by management">Laporan diluluskan pengurusan</span></div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <div class="panel-head">
+      <h3 data-ms="Barisan tugasan" data-en="Task queue">Barisan tugasan</h3>
+      <span class="pill">{{ incidents|length }}</span>
+    </div>
+    <div class="panel-scroll tbl-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th data-ms="Jenis" data-en="Type">Jenis</th>
+            <th data-ms="Lif / Premis" data-en="Lift / Premise">Lif / Premis</th>
+            <th data-ms="Dikesan" data-en="Detected">Dikesan</th>
+            <th data-ms="Dihadiri" data-en="Attended">Dihadiri</th>
+            <th data-ms="Laporan perlu" data-en="Report due">Laporan perlu</th>
+            <th data-ms="Status" data-en="Status">Status</th>
+            <th data-ms="Tindakan" data-en="Action">Tindakan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for incident in incidents %}
+          <tr {% if incident.is_emergency %}class="sev"{% endif %}>
+            <td>{{ incident.incident_type }}</td>
+            <td>
+              <div class="liftid mono">{{ incident.lift.lift_identifier }}</div>
+              <div class="premise">{{ incident.lift.premise_name }}</div>
+            </td>
+            <td class="when">{{ incident.timestamp|date:"d M Y, H:i" }}</td>
+            <td class="when">{% if incident.time_attended %}{{ incident.time_attended|date:"d M Y, H:i" }}{% else %}&mdash;{% endif %}</td>
+            <td class="when">{% if incident.report_due_date %}{{ incident.report_due_date|date:"d M Y" }}{% else %}&mdash;{% endif %}</td>
+            <td>
+              {% if incident.status == 'Resolved' %}
+                <span class="badge resolved" data-ms="Diluluskan" data-en="Approved">Diluluskan</span>
+              {% elif incident.status == 'Pending Review' %}
+                <span class="badge review" data-ms="Dihantar" data-en="Submitted">Dihantar</span>
+              {% elif incident.status == 'Attended' %}
+                <span class="badge attended" data-ms="Perlu dihantar" data-en="Pending submission">Perlu dihantar</span>
+              {% elif incident.status == 'Correction Required' %}
+                <span class="badge detected" data-ms="Perlu pembetulan" data-en="Correction required">Perlu pembetulan</span>
+              {% elif incident.status == 'Detected' %}
+                <span class="badge detected" data-ms="Dikesan" data-en="Detected">Dikesan</span>
+              {% else %}
+                <span class="badge attended">{{ incident.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if incident.status == 'Attended' or incident.status == 'Correction Required' %}
+                <a class="btn" style="padding:6px 12px; font-size:12px;" href="{% url 'submit_report' incident.id %}">
+                  {% if incident.status == 'Correction Required' %}<span data-ms="Hantar semula" data-en="Resubmit">Hantar semula</span>{% else %}<span data-ms="Hantar laporan" data-en="Submit report">Hantar laporan</span>{% endif %}
+                </a>
+              {% elif incident.status == 'Pending Review' %}
+                <a class="btn ghost" style="padding:6px 12px; font-size:12px;" href="{% url 'review_report' incident.id %}" data-ms="Semak laporan" data-en="Review report">Semak laporan</a>
+              {% elif incident.status == 'Resolved' %}
+                <a class="btn ghost" style="padding:6px 12px; font-size:12px;" href="{% url 'view_report' incident.id %}" data-ms="Lihat laporan" data-en="View report">Lihat laporan</a>
+              {% else %}
+                <span class="premise">&mdash;</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" style="text-align:center; color:var(--text-faint); padding:32px;" data-ms="Tiada insiden direkodkan." data-en="No incidents recorded.">Tiada insiden direkodkan.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+{% endblock %}

@@ -31,6 +31,14 @@ from .serializers import LiftSerializer, IncidentSerializer, IncidentReportSeria
 from .telegram_bot import send_telegram_message
 
 
+def landing(request):
+    """Public marketing / entry page. No auth. Logged-in users go straight to
+    the dashboard."""
+    if request.user.is_authenticated:
+        return redirect('incident_list')
+    return render(request, 'landing.html')
+
+
 @csrf_exempt
 def healthz(request):
     """Lightweight health check. Touches the DB so an external pinger keeps both

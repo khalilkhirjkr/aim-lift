@@ -7,8 +7,11 @@ urlpatterns = [
     # Keep-alive / health check (used by external uptime pinger)
     path('healthz/', views.healthz, name='healthz'),
 
+    # Public landing page
+    path('', views.landing, name='landing'),
+
     # Dashboards
-    path('', views.incident_list, name='incident_list'),
+    path('dashboard/', views.incident_list, name='incident_list'),
     path('contractor/', views.contractor_dashboard, name='contractor_dashboard'),
     path('health/', views.lift_health_dashboard, name='lift_health'),
     path('analytics/jkr/', views.jkr_analytics_dashboard, name='jkr_analytics_dashboard'),

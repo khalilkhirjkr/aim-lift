@@ -1,0 +1,210 @@
+{% load static %}<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIM-Lift — Sistem Pemantauan Lif Pintar</title>
+  <meta name="description" content="Pemantauan IoT dan ramalan kerosakan untuk lif di mana-mana bangunan. Kesan anomali awal, uruskan insiden, dan pastikan SLA dipatuhi.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=Inter:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="{% static 'lifts/css/landing.css' %}">
+  <script>
+    try { if (localStorage.getItem("aim.lang") === "en") document.documentElement.setAttribute("lang", "en"); } catch (e) {}
+  </script>
+</head>
+<body>
+
+<header class="lp-nav">
+  <div class="lp-wrap lp-nav-inner">
+    <a class="lp-logo" href="#top">
+      <svg class="m" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="#10B981"/>
+        <rect x="9" y="8" width="6" height="16" rx="1.4" fill="#04140F"/>
+        <rect x="17" y="8" width="6" height="16" rx="1.4" fill="#04140F" opacity=".5"/>
+      </svg>
+      AIM-Lift
+    </a>
+    <nav class="lp-links">
+      <a href="#ciri" data-ms="Ciri" data-en="Features">Ciri</a>
+      <a href="#cara" data-ms="Cara Kerja" data-en="How It Works">Cara Kerja</a>
+      <a href="#siapa" data-ms="Untuk Siapa" data-en="Who It's For">Untuk Siapa</a>
+      <a href="#faq" data-ms="FAQ" data-en="FAQ">FAQ</a>
+    </nav>
+    <div class="lp-nav-cta">
+      <div class="lp-langseg" data-langseg>
+        <button type="button" data-lang="ms" aria-pressed="true">BM</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+      <a class="lp-btn ghost" href="{% url 'login' %}" data-ms="Log masuk" data-en="Log in">Log masuk</a>
+      <a class="lp-btn solid" href="{% url 'incident_list' %}" data-ms="Buka dashboard" data-en="Open dashboard">Buka dashboard</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+  <section class="lp-hero">
+    <div class="lp-wrap">
+      <span class="lp-eyebrow" data-ms="🛗 Sistem Pemantauan Lif Pintar" data-en="🛗 Smart Lift Monitoring System">🛗 Sistem Pemantauan Lif Pintar</span>
+      <h1 data-rich
+          data-ms="Setiap lif, dipantau 24/7 &mdash; <span class='g'>sebelum ia rosak.</span>"
+          data-en="Every lift, monitored 24/7 &mdash; <span class='g'>before it breaks down.</span>">Setiap lif, dipantau 24/7 &mdash; <span class="g">sebelum ia rosak.</span></h1>
+      <p data-ms="AIM-Lift ialah sistem pemantauan IoT dan ramalan kerosakan untuk lif di mana-mana bangunan — kesan anomali awal, uruskan insiden, dan pastikan SLA dipatuhi."
+         data-en="AIM-Lift is an IoT monitoring and failure-prediction system for lifts in any building — catch anomalies early, manage incidents, and keep SLAs on track.">AIM-Lift ialah sistem pemantauan IoT dan ramalan kerosakan untuk lif di mana-mana bangunan — kesan anomali awal, uruskan insiden, dan pastikan SLA dipatuhi.</p>
+      <div class="lp-hero-cta">
+        <a class="lp-btn solid lg" href="{% url 'incident_list' %}" data-ms="Buka dashboard &rarr;" data-en="Open dashboard &rarr;">Buka dashboard &rarr;</a>
+        <a class="lp-btn ghost lg" href="#cara" data-ms="Lihat cara kerja" data-en="See how it works">Lihat cara kerja</a>
+      </div>
+      <div class="lp-trust">
+        <span><span class="ck">&check;</span> <span data-ms="Sensor IoT pada setiap lif" data-en="IoT sensor on every lift">Sensor IoT pada setiap lif</span></span>
+        <span><span class="ck">&check;</span> <span data-ms="Ramalan kerosakan (ML)" data-en="Failure prediction (ML)">Ramalan kerosakan (ML)</span></span>
+        <span><span class="ck">&check;</span> <span data-ms="Alert automatik ke Telegram" data-en="Automatic Telegram alerts">Alert automatik ke Telegram</span></span>
+      </div>
+      <div class="lp-floats">
+        <div class="lp-float"><span class="fi">🛗</span><span><span class="fv">129</span><br><span class="fl" data-ms="Lif aktif dipantau" data-en="Active lifts monitored">Lif aktif dipantau</span></span></div>
+        <div class="lp-float"><span class="fi">⚡</span><span><span class="fv">92%</span><br><span class="fl" data-ms="SLA dipatuhi bulan ini" data-en="SLA met this month">SLA dipatuhi bulan ini</span></span></div>
+        <div class="lp-float"><span class="fi">🔔</span><span><span class="fv">5</span><br><span class="fl" data-ms="Insiden terbuka sekarang" data-en="Open incidents now">Insiden terbuka sekarang</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Dalam Angka" data-en="By the Numbers">Dalam Angka</div>
+      <h2 class="reveal" data-ms="Dibina untuk seluruh armada lif anda" data-en="Built for your entire lift fleet">Dibina untuk seluruh armada lif anda</h2>
+      <div class="lp-statband">
+        <div class="reveal"><div class="n">129</div><div class="l" data-ms="Lif dipantau" data-en="Lifts monitored">Lif dipantau</div></div>
+        <div class="reveal"><div class="n">24/7</div><div class="l" data-ms="Pemantauan masa nyata" data-en="Real-time monitoring">Pemantauan masa nyata</div></div>
+        <div class="reveal"><div class="n">&lt;30<small> min</small></div><div class="l" data-ms="Sasaran tindak balas kecemasan" data-en="Emergency response target">Sasaran tindak balas kecemasan</div></div>
+        <div class="reveal"><div class="n">6</div><div class="l" data-ms="Jenis kerosakan dikesan" data-en="Failure types detected">Jenis kerosakan dikesan</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="komponen">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Komponen Sistem" data-en="System Components">Komponen Sistem</div>
+      <h2 class="reveal" data-ms="Tiga bahagian, satu aliran lengkap" data-en="Three parts, one complete flow">Tiga bahagian, satu aliran lengkap</h2>
+      <p class="sub reveal" data-ms="Dari bilik enjin lif ke telefon jurutera — setiap bahagian direka untuk berfungsi bersama." data-en="From the lift machine room to the engineer's phone — every part is built to work together.">Dari bilik enjin lif ke telefon jurutera — setiap bahagian direka untuk berfungsi bersama.</p>
+      <div class="lp-cards c3">
+        <div class="lp-card reveal"><div class="ci">📡</div><h3 data-ms="Sensor IoT (ESP32)" data-en="IoT Sensor (ESP32)">Sensor IoT (ESP32)</h3><p data-ms="Unit sensor pada setiap lif mengukur getaran, bunyi, dan pecutan — menghantar data ke pelayan secara berterusan melalui WiFi." data-en="A sensor unit on each lift measures vibration, sound and acceleration — streaming data to the server continuously over WiFi.">Unit sensor pada setiap lif mengukur getaran, bunyi, dan pecutan — menghantar data ke pelayan secara berterusan melalui WiFi.</p></div>
+        <div class="lp-card reveal"><div class="ci">🧠</div><h3 data-ms="Model Ramalan" data-en="Prediction Model">Model Ramalan</h3><p data-ms="Model pembelajaran mesin menilai bacaan sensor dan mengesan corak kegagalan sebelum lif benar-benar rosak." data-en="A machine-learning model evaluates the sensor readings and detects failure patterns before the lift actually breaks down.">Model pembelajaran mesin menilai bacaan sensor dan mengesan corak kegagalan sebelum lif benar-benar rosak.</p></div>
+        <div class="lp-card reveal"><div class="ci">📊</div><h3 data-ms="Dashboard &amp; Alert" data-en="Dashboard &amp; Alerts">Dashboard &amp; Alert</h3><p data-ms="Insiden muncul di dashboard dengan peta langsung, aliran kerja laporan, dan alert automatik ke Telegram pasukan." data-en="Incidents appear on the dashboard with a live map, a reporting workflow, and automatic alerts to the team's Telegram.">Insiden muncul di dashboard dengan peta langsung, aliran kerja laporan, dan alert automatik ke Telegram pasukan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="ciri">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Ciri-Ciri" data-en="Features">Ciri-Ciri</div>
+      <h2 class="reveal" data-ms="Semua yang pasukan penyelenggaraan perlukan" data-en="Everything the maintenance team needs">Semua yang pasukan penyelenggaraan perlukan</h2>
+      <p class="sub reveal" data-ms="Dari pengesanan sehingga penutupan insiden — dalam satu tempat." data-en="From detection to incident closure — in one place.">Dari pengesanan sehingga penutupan insiden — dalam satu tempat.</p>
+      <div class="lp-features">
+        <div class="lp-feat reveal"><div class="fi">📈</div><h4 data-ms="Pemantauan masa nyata" data-en="Real-time monitoring">Pemantauan masa nyata</h4><p data-ms="Status setiap lif dan bacaan sensor terkini, dikemas kini secara langsung." data-en="Every lift's status and latest sensor readings, updated live.">Status setiap lif dan bacaan sensor terkini, dikemas kini secara langsung.</p></div>
+        <div class="lp-feat reveal"><div class="fi">🔮</div><h4 data-ms="Ramalan kerosakan" data-en="Failure prediction">Ramalan kerosakan</h4><p data-ms="Amaran awal untuk kelewatan pintu, kelewatan pemacu, dan isyarat sebelum ia gagal." data-en="Early warning for door delays, drive delays and signal faults before they fail.">Amaran awal untuk kelewatan pintu, kelewatan pemacu, dan isyarat sebelum ia gagal.</p></div>
+        <div class="lp-feat reveal"><div class="fi">🗺️</div><h4 data-ms="Peta insiden langsung" data-en="Live incident map">Peta insiden langsung</h4><p data-ms="Lihat lokasi setiap insiden aktif di seluruh premis anda pada satu peta." data-en="See where every active incident is across your premises on one map.">Lihat lokasi setiap insiden aktif di seluruh premis anda pada satu peta.</p></div>
+        <div class="lp-feat reveal"><div class="fi">📝</div><h4 data-ms="Aliran kerja laporan" data-en="Reporting workflow">Aliran kerja laporan</h4><p data-ms="Kontraktor hantar laporan punca &amp; tindakan; pihak pengurusan semak dan luluskan dalam sistem." data-en="Contractors submit root-cause and action reports; management reviews and approves in-system.">Kontraktor hantar laporan punca &amp; tindakan; pihak pengurusan semak dan luluskan dalam sistem.</p></div>
+        <div class="lp-feat reveal"><div class="fi">⏱️</div><h4 data-ms="Jejak SLA" data-en="SLA tracking">Jejak SLA</h4><p data-ms="Setiap insiden dijejaki mengikut masa tindak balas — ditepati, berisiko, atau dilanggar." data-en="Every incident is tracked against response time — met, at risk, or breached.">Setiap insiden dijejaki mengikut masa tindak balas — ditepati, berisiko, atau dilanggar.</p></div>
+        <div class="lp-feat reveal"><div class="fi">🔔</div><h4 data-ms="Alert Telegram" data-en="Telegram alerts">Alert Telegram</h4><p data-ms="Insiden baharu dan kemas kini status dihantar terus ke kumpulan Telegram pasukan." data-en="New incidents and status updates go straight to the team's Telegram group.">Insiden baharu dan kemas kini status dihantar terus ke kumpulan Telegram pasukan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="cara">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Cara Kerja" data-en="How It Works">Cara Kerja</div>
+      <h2 class="reveal" data-ms="Empat langkah, dari sensor ke tindakan" data-en="Four steps, from sensor to action">Empat langkah, dari sensor ke tindakan</h2>
+      <div class="lp-steps">
+        <div class="lp-step reveal"><div class="sn">1</div><h4 data-ms="Pasang sensor" data-en="Install the sensor">Pasang sensor</h4><p data-ms="Unit IoT dipasang pada lif dan disambung ke WiFi bangunan melalui portal ringkas." data-en="The IoT unit is fitted to the lift and connected to the building WiFi through a simple portal.">Unit IoT dipasang pada lif dan disambung ke WiFi bangunan melalui portal ringkas.</p></div>
+        <div class="lp-step reveal"><div class="sn">2</div><h4 data-ms="Data mengalir masuk" data-en="Data flows in">Data mengalir masuk</h4><p data-ms="Sensor menghantar bacaan getaran, bunyi, dan pecutan ke pelayan sepanjang masa." data-en="The sensor sends vibration, sound and acceleration readings to the server around the clock.">Sensor menghantar bacaan getaran, bunyi, dan pecutan ke pelayan sepanjang masa.</p></div>
+        <div class="lp-step reveal"><div class="sn">3</div><h4 data-ms="Sistem kesan anomali" data-en="The system spots anomalies">Sistem kesan anomali</h4><p data-ms="Model menilai data dan membuka insiden automatik apabila corak kegagalan dikesan." data-en="The model evaluates the data and opens an incident automatically when a failure pattern is detected.">Model menilai data dan membuka insiden automatik apabila corak kegagalan dikesan.</p></div>
+        <div class="lp-step reveal"><div class="sn">4</div><h4 data-ms="Pasukan bertindak" data-en="The team responds">Pasukan bertindak</h4><p data-ms="Jurutera dan kontraktor terima alert, hadir ke lokasi, dan tutup insiden dengan laporan." data-en="Engineers and contractors get the alert, attend on site, and close the incident with a report.">Jurutera dan kontraktor terima alert, hadir ke lokasi, dan tutup insiden dengan laporan.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="siapa">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Untuk Siapa" data-en="Who It's For">Untuk Siapa</div>
+      <h2 class="reveal" data-ms="Satu sistem, dua peranan" data-en="One system, two roles">Satu sistem, dua peranan</h2>
+      <div class="lp-cards c2">
+        <div class="lp-card reveal">
+          <div class="ci">👷</div><h3 data-ms="Pasukan Fasiliti" data-en="Facilities Team">Pasukan Fasiliti</h3>
+          <p data-ms="Pantau kesihatan seluruh armada lif dan uruskan insiden dari satu dashboard." data-en="Monitor the health of the whole lift fleet and manage incidents from one dashboard.">Pantau kesihatan seluruh armada lif dan uruskan insiden dari satu dashboard.</p>
+          <ul>
+            <li data-ms="Dashboard insiden &amp; peta langsung" data-en="Incident dashboard &amp; live map">Dashboard insiden &amp; peta langsung</li>
+            <li data-ms="Analitik prestasi &amp; SLA" data-en="Performance &amp; SLA analytics">Analitik prestasi &amp; SLA</li>
+            <li data-ms="Semak &amp; luluskan laporan kontraktor" data-en="Review &amp; approve contractor reports">Semak &amp; luluskan laporan kontraktor</li>
+            <li data-ms="Kesihatan lif &amp; ramalan kerosakan" data-en="Lift health &amp; failure prediction">Kesihatan lif &amp; ramalan kerosakan</li>
+          </ul>
+        </div>
+        <div class="lp-card pop reveal">
+          <span class="poptag" data-ms="Melalui app mobile" data-en="Via the mobile app">Melalui app mobile</span>
+          <div class="ci">🔧</div><h3 data-ms="Kontraktor" data-en="Contractors">Kontraktor</h3>
+          <p data-ms="Terima tugasan di telefon, hadir ke lokasi, dan hantar laporan terus dari tapak." data-en="Receive jobs on the phone, attend on site, and submit reports straight from the field.">Terima tugasan di telefon, hadir ke lokasi, dan hantar laporan terus dari tapak.</p>
+          <ul>
+            <li data-ms="Notifikasi tugasan segera" data-en="Instant job notifications">Notifikasi tugasan segera</li>
+            <li data-ms="Hantar laporan punca &amp; tindakan" data-en="Submit root-cause &amp; action reports">Hantar laporan punca &amp; tindakan</li>
+            <li data-ms="Muat naik gambar bukti" data-en="Upload photo evidence">Muat naik gambar bukti</li>
+            <li data-ms="Akuan penyiapan kerja" data-en="Work completion acknowledgement">Akuan penyiapan kerja</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-section" id="faq">
+    <div class="lp-wrap">
+      <div class="lp-kicker reveal" data-ms="Soalan Lazim" data-en="FAQ">Soalan Lazim</div>
+      <h2 class="reveal" data-ms="Soalan yang kerap ditanya" data-en="Frequently asked questions">Soalan yang kerap ditanya</h2>
+      <div class="lp-faq">
+        <details>
+          <summary data-ms="Apa yang sensor ukur pada lif?" data-en="What does the sensor measure on the lift?">Apa yang sensor ukur pada lif?</summary>
+          <p data-ms="Getaran, pecutan menegak, dan aras bunyi — petunjuk awal untuk masalah pintu, pemacu, dan isyarat. Data dihantar ke pelayan secara berterusan." data-en="Vibration, vertical acceleration and sound level — early indicators of door, drive and signal problems. Data is sent to the server continuously.">Getaran, pecutan menegak, dan aras bunyi — petunjuk awal untuk masalah pintu, pemacu, dan isyarat. Data dihantar ke pelayan secara berterusan.</p>
+        </details>
+        <details>
+          <summary data-ms="Perlukah talian internet khas untuk setiap lif?" data-en="Does each lift need its own internet line?">Perlukah talian internet khas untuk setiap lif?</summary>
+          <p data-ms="Tidak. Unit IoT bersambung ke WiFi bangunan sedia ada. Untuk lokasi tanpa WiFi yang sesuai, sambungan 4G boleh digunakan." data-en="No. The IoT unit connects to the building's existing WiFi. For sites without suitable WiFi, a 4G connection can be used.">Tidak. Unit IoT bersambung ke WiFi bangunan sedia ada. Untuk lokasi tanpa WiFi yang sesuai, sambungan 4G boleh digunakan.</p>
+        </details>
+        <details>
+          <summary data-ms="Bagaimana insiden dibuka dan ditutup?" data-en="How are incidents opened and closed?">Bagaimana insiden dibuka dan ditutup?</summary>
+          <p data-ms="Sistem membuka insiden automatik apabila anomali dikesan (atau melalui butang kecemasan di lif). Ia melalui aliran Dikesan → Dihadiri → Semakan Laporan → Selesai." data-en="The system opens an incident automatically when an anomaly is detected (or via the emergency button in the lift). It moves through Detected → Attended → Report Review → Resolved.">Sistem membuka insiden automatik apabila anomali dikesan (atau melalui butang kecemasan di lif). Ia melalui aliran Dikesan → Dihadiri → Semakan Laporan → Selesai.</p>
+        </details>
+        <details>
+          <summary data-ms="Siapa boleh log masuk?" data-en="Who can log in?">Siapa boleh log masuk?</summary>
+          <p data-ms="Hanya pengguna yang dibenarkan — pasukan fasiliti dan kontraktor. Setiap pengguna mempunyai akaun peribadi dengan peranan yang ditetapkan." data-en="Only authorised users — the facilities team and contractors. Each user has a personal account with an assigned role.">Hanya pengguna yang dibenarkan — pasukan fasiliti dan kontraktor. Setiap pengguna mempunyai akaun peribadi dengan peranan yang ditetapkan.</p>
+        </details>
+        <details>
+          <summary data-ms="Adakah data disimpan dengan selamat?" data-en="Is the data stored securely?">Adakah data disimpan dengan selamat?</summary>
+          <p data-ms="Ya. Pangkalan data dilindungi, capaian melalui log masuk sahaja, dan pengendalian data mematuhi Akta PDPA Malaysia." data-en="Yes. The database is protected, access is login-only, and data handling complies with Malaysia's PDPA.">Ya. Pangkalan data dilindungi, capaian melalui log masuk sahaja, dan pengendalian data mematuhi Akta PDPA Malaysia.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="lp-final">
+    <div class="lp-wrap">
+      <h2 class="reveal" data-ms="Mula pantau lif anda hari ini." data-en="Start monitoring your lifts today.">Mula pantau lif anda hari ini.</h2>
+      <p class="reveal" data-ms="Kurangkan lif tersekat, penuhi SLA, dan baiki sebelum rosak — dengan AIM-Lift." data-en="Fewer stuck lifts, SLAs met, and repairs before breakdowns — with AIM-Lift.">Kurangkan lif tersekat, penuhi SLA, dan baiki sebelum rosak — dengan AIM-Lift.</p>
+      <div class="lp-final-cta reveal">
+        <a class="lp-btn solid lg" href="{% url 'incident_list' %}" data-ms="Buka dashboard &rarr;" data-en="Open dashboard &rarr;">Buka dashboard &rarr;</a>
+        <a class="text" href="{% url 'login' %}" data-ms="Log masuk" data-en="Log in">Log masuk</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="lp-foot">
+    <div class="lp-wrap lp-foot-inner">
+      <span>🛗 AIM-Lift &copy; 2026</span>
+      <nav>
+        <a href="#" data-ms="Dasar Privasi" data-en="Privacy Policy">Dasar Privasi</a>
+        <a href="#" data-ms="Terma Penggunaan" data-en="Terms of Use">Terma Penggunaan</a>
+        <a href="#" data-ms="Hubungi Kami" data-en="Contact Us">Hubungi Kami</a>
+      </nav>
+    </div>
+  </footer>
+</main>
+
+<script src="{% static 'lifts/js/ui.js' %}" defer></script>
+</body>
+</html>

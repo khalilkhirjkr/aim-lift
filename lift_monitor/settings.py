@@ -88,7 +88,7 @@ ROOT_URLCONF = 'lift_monitor.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -201,8 +201,8 @@ if env_bool('USE_SUPABASE_STORAGE'):
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/' # Redirect to the root URL (incident list) after login
-LOGOUT_REDIRECT_URL = '/accounts/login/' # Redirect to login page after logout
+LOGIN_REDIRECT_URL = '/dashboard/' # Incident dashboard after login
+LOGOUT_REDIRECT_URL = '/'           # Public landing page after logout
 
 # CORS (for the Flutter app / web frontend talking to this API cross-origin).
 # Extra origins for the deployed frontends come from DJANGO_CORS_ALLOWED_ORIGINS.
