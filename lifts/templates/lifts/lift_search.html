@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Carian Lif — AIM-Lift{% endblock %}
+{% block body_class %}app-scroll{% endblock %}
+{% block crumb %}<span data-ms="Pantau" data-en="Monitor">Pantau</span>{% endblock %}
+{% block page_title %}<span data-ms="Carian lif" data-en="Lift search">Carian lif</span>{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-head">
+      <h3>
+        {% if q %}
+          <span data-ms="Keputusan untuk" data-en="Results for">Keputusan untuk</span> &ldquo;{{ q }}&rdquo;
+        {% else %}
+          <span data-ms="Cari lif" data-en="Search lift">Cari lif</span>
+        {% endif %}
+      </h3>
+      {% if lifts %}<span class="pill">{{ lifts|length }}</span>{% endif %}
+    </div>
+
+    <div style="padding:16px;">
+      <form method="get" action="{% url 'lift_search' %}" style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+        <div class="form-field" style="flex:1; min-width:240px;">
+          <label for="q" data-ms="ID lif atau premis" data-en="Lift ID or premise">ID lif atau premis</label>
+          <input type="search" id="q" name="q" value="{{ q }}" class="form-input" autocomplete="off"
+                 placeholder="cth. PMA 101482" data-ms="cth. PMA 101482" data-en="e.g. PMA 101482">
+        </div>
+        <button type="submit" class="btn" data-ms="Cari" data-en="Search">Cari</button>
+      </form>
+    </div>
+  </section>
+
+  {% if q and not lifts %}
+    <div class="notice">
+      <span data-ms="Tiada lif sepadan dengan carian itu." data-en="No lift matches that search.">Tiada lif sepadan dengan carian itu.</span>
+    </div>
+  {% endif %}
+
+  {% if lifts %}
+  <section class="panel">
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead>
+          <tr>
+            <th data-ms="ID Lif" data-en="Lift ID">ID Lif</th>
+            <th data-ms="Premis" data-en="Premise">Premis</th>
+            <th data-ms="Kontraktor" data-en="Contractor">Kontraktor</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for lift in lifts %}
+          <tr>
+            <td class="liftid">{{ lift.lift_identifier }}</td>
+            <td class="premise">{{ lift.premise_name }}</td>
+            <td class="premise">{{ lift.contractor.name|default:"—" }}</td>
+            <td style="text-align:right; white-space:nowrap;">
+              <a class="btn" href="{% url 'lift_health' %}?lift_id={{ lift.id }}"
+                 data-ms="Buka kesihatan" data-en="Open health">Buka kesihatan</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% endif %}
+{% endblock %}

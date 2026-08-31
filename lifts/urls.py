@@ -12,6 +12,7 @@ urlpatterns = [
 
     # Dashboards
     path('dashboard/', views.incident_list, name='incident_list'),
+    path('search/', views.lift_search, name='lift_search'),
     path('contractor/', views.contractor_dashboard, name='contractor_dashboard'),
     path('health/', views.lift_health_dashboard, name='lift_health'),
     path('analytics/jkr/', views.jkr_analytics_dashboard, name='jkr_analytics_dashboard'),

@@ -210,6 +210,23 @@ SENSOR_THRESHOLDS = {
 # ... (keep all your imports at the top of the file) ...
 
 @login_required
+def lift_search(request):
+    """Global top-bar search. Matches a lift by identifier or premise name.
+    One hit -> jump straight to its health page; otherwise show a result list."""
+    q = (request.GET.get('q') or '').strip()
+    lifts = []
+    if q:
+        lifts = list(
+            Lift.objects.filter(
+                Q(lift_identifier__icontains=q) | Q(premise_name__icontains=q)
+            ).order_by('lift_identifier')[:50]
+        )
+        if len(lifts) == 1:
+            return redirect(f"{reverse('lift_health')}?lift_id={lifts[0].id}")
+    return render(request, 'lifts/lift_search.html', {'q': q, 'lifts': lifts})
+
+
+@login_required
 def incident_list(request):
     incidents = Incident.objects.all().order_by('-timestamp')
 

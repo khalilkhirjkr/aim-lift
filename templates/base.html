@@ -89,10 +89,14 @@
         <h1>{% block page_title %}AIM-Lift{% endblock %}</h1>
       </div>
       <div class="topbar-right">
-        <div class="search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <span data-ms="Cari ID lif, premis…" data-en="Search lift ID, premise…">Cari ID lif, premis…</span>
-        </div>
+        <form class="search" method="get" action="{% url 'lift_search' %}" role="search">
+          <button type="submit" class="search-go" aria-label="Cari">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </button>
+          <input type="search" name="q" value="{{ request.GET.q|default:'' }}"
+                 placeholder="Cari ID lif, premis…" aria-label="Cari lif" autocomplete="off"
+                 data-ms="Cari ID lif, premis…" data-en="Search lift ID, premise…">
+        </form>
         <div class="seg" data-langseg>
           <button type="button" data-lang="ms" aria-pressed="true">BM</button>
           <button type="button" data-lang="en" aria-pressed="false">EN</button>
