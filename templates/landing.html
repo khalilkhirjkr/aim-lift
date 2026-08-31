@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AIM-Lift — Sistem Pemantauan Lif Pintar</title>
-  <meta name="description" content="Pemantauan IoT dan ramalan kerosakan untuk lif di mana-mana bangunan. Kesan anomali awal, uruskan insiden, dan pastikan SLA dipatuhi.">
+  <meta name="description" content="Pemantauan berterusan dan amaran awal untuk lif di mana-mana bangunan. Kesan masalah lebih awal, uruskan insiden, dan pastikan SLA dipatuhi.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap">
@@ -43,24 +43,26 @@
     <h1 class="fade f2" data-rich
         data-ms="Kerosakan lif, dikesan <span class='grad-text'>sebelum ia berlaku.</span>"
         data-en="Lift failures, caught <span class='grad-text'>before they happen.</span>">Kerosakan lif, dikesan <span class="grad-text">sebelum ia berlaku.</span></h1>
-    <p class="lede fade f3" data-ms="Sensor IoT pada setiap lif, model ramalan kerosakan, dan aliran kerja insiden — dalam satu skrin yang hidup." data-en="An IoT sensor on every lift, a failure-prediction model, and an incident workflow — on one living screen.">Sensor IoT pada setiap lif, model ramalan kerosakan, dan aliran kerja insiden — dalam satu skrin yang hidup.</p>
+    <p class="lede fade f3" data-ms="Pemantauan berterusan dan amaran awal untuk setiap lif dalam bangunan anda — semuanya dalam satu skrin." data-en="Continuous monitoring and early warnings for every lift in your building — all on one screen.">Pemantauan berterusan dan amaran awal untuk setiap lif dalam bangunan anda — semuanya dalam satu skrin.</p>
     <div class="hero-cta fade f4">
       <a class="btn grad lg" href="{% url 'incident_list' %}" data-ms="Buka dashboard &rarr;" data-en="Open dashboard &rarr;">Buka dashboard &rarr;</a>
       <a class="btn ghost lg" href="#cara" data-ms="Tengok cara kerja" data-en="See how it works">Tengok cara kerja</a>
     </div>
 
-    <div class="stage fade f4" id="stage">
-      <video class="stage-vid" autoplay muted loop playsinline preload="auto">
-        <source src="{% static 'lifts/videos/hero-lift.mp4' %}" type="video/mp4">
-      </video>
+    <div class="stage-wrap fade f4">
+      <div class="stage" id="stage">
+        <video class="stage-vid" autoplay muted loop playsinline preload="auto">
+          <source src="{% static 'lifts/videos/hero-lift.mp4' %}" type="video/mp4">
+        </video>
+      </div>
 
       <div class="mini" aria-hidden="true">
         <div class="h"><span class="tag"><i></i> <span data-ms="LANGSUNG" data-en="LIVE">LANGSUNG</span></span><span class="mono">14:32</span></div>
-        <div class="big">129 <span data-ms="lif dipantau" data-en="lifts monitored">lif dipantau</span></div>
+        <div class="big" data-ms="Semua lif dipantau" data-en="All lifts monitored">Semua lif dipantau</div>
         <div class="bars">
           <i style="animation-delay:0s"></i><i style="animation-delay:.2s"></i><i style="animation-delay:.4s"></i><i style="animation-delay:.1s"></i><i style="animation-delay:.5s"></i><i style="animation-delay:.3s"></i><i style="animation-delay:.15s"></i><i style="animation-delay:.45s"></i><i style="animation-delay:.25s"></i><i style="animation-delay:.35s"></i>
         </div>
-        <div class="row"><span><b>92%</b> SLA</span><span><b>5</b> <span data-ms="terbuka" data-en="open">terbuka</span></span><span><b>&lt;30</b> min</span></div>
+        <div class="row"><span data-ms="Pemantauan aktif" data-en="Monitoring active">Pemantauan aktif</span><span data-ms="Amaran awal" data-en="Early warnings">Amaran awal</span></div>
       </div>
     </div>
   </div>
@@ -70,13 +72,13 @@
   <div class="wrap">
     <div class="sec-head reveal">
       <span class="kick" data-ms="Cara Kerja" data-en="How It Works">Cara Kerja</span>
-      <h2 data-ms="Dari getaran ke tindakan, automatik." data-en="From vibration to action, automatically.">Dari getaran ke tindakan, automatik.</h2>
+      <h2 data-ms="Dari amaran awal ke tindakan." data-en="From early warning to action.">Dari amaran awal ke tindakan.</h2>
     </div>
     <div class="steps">
-      <div class="step reveal"><div class="n">1</div><h3 data-ms="Pasang sensor" data-en="Fit the sensor">Pasang sensor</h3><p data-ms="Unit IoT dipasang pada lif, sambung WiFi bangunan melalui portal ringkas." data-en="An IoT unit is fitted to the lift and joins the building WiFi via a simple portal.">Unit IoT dipasang pada lif, sambung WiFi bangunan melalui portal ringkas.</p></div>
-      <div class="step reveal d1"><div class="n">2</div><h3 data-ms="Data mengalir" data-en="Data streams">Data mengalir</h3><p data-ms="Getaran, bunyi, dan pecutan dihantar ke pelayan sepanjang masa." data-en="Vibration, sound and acceleration stream to the server around the clock.">Getaran, bunyi, dan pecutan dihantar ke pelayan sepanjang masa.</p></div>
-      <div class="step reveal d2"><div class="n">3</div><h3 data-ms="Model kesan" data-en="The model catches it">Model kesan</h3><p data-ms="Corak kegagalan dikesan; insiden dibuka automatik sebelum lif berhenti." data-en="A failure pattern is detected; an incident opens automatically before the lift stops.">Corak kegagalan dikesan; insiden dibuka automatik sebelum lif berhenti.</p></div>
-      <div class="step reveal d3"><div class="n">4</div><h3 data-ms="Pasukan bertindak" data-en="The team acts">Pasukan bertindak</h3><p data-ms="Alert ke Telegram, kontraktor hadir, laporan ditutup dalam sistem." data-en="A Telegram alert fires, a contractor attends, the report closes in-system.">Alert ke Telegram, kontraktor hadir, laporan ditutup dalam sistem.</p></div>
+      <div class="step reveal"><div class="n">1</div><h3 data-ms="Pemasangan ringkas" data-en="Simple install">Pemasangan ringkas</h3><p data-ms="Sensor dipasang pada lif tanpa mengganggu operasi." data-en="A sensor is fitted to the lift without disrupting service.">Sensor dipasang pada lif tanpa mengganggu operasi.</p></div>
+      <div class="step reveal d1"><div class="n">2</div><h3 data-ms="Pemantauan berterusan" data-en="Always watching">Pemantauan berterusan</h3><p data-ms="Keadaan setiap lif diperhatikan sepanjang masa." data-en="Every lift's condition is watched around the clock.">Keadaan setiap lif diperhatikan sepanjang masa.</p></div>
+      <div class="step reveal d2"><div class="n">3</div><h3 data-ms="Amaran awal" data-en="Early warning">Amaran awal</h3><p data-ms="Tanda kerosakan dikesan lebih awal, sebelum lif berhenti." data-en="Signs of failure are caught early, before the lift stops.">Tanda kerosakan dikesan lebih awal, sebelum lif berhenti.</p></div>
+      <div class="step reveal d3"><div class="n">4</div><h3 data-ms="Tindakan pantas" data-en="Fast response">Tindakan pantas</h3><p data-ms="Pasukan dimaklumkan serta-merta dan insiden diuruskan sehingga selesai." data-en="The team is notified at once and the incident is managed to closure.">Pasukan dimaklumkan serta-merta dan insiden diuruskan sehingga selesai.</p></div>
     </div>
   </div>
 </section>
@@ -89,10 +91,10 @@
     </div>
     <div class="bento">
       <div class="cell w3 reveal"><div class="ico">🗺️</div><div><h3 data-ms="Peta insiden langsung" data-en="Live incident map">Peta insiden langsung</h3><p data-ms="Setiap insiden aktif di seluruh premis anda, pada satu peta yang dikemas kini terus." data-en="Every active incident across your premises, on one map that updates live.">Setiap insiden aktif di seluruh premis anda, pada satu peta yang dikemas kini terus.</p></div></div>
-      <div class="cell w3 reveal d1"><div class="ico">🔮</div><div><h3 data-ms="Ramalan kerosakan" data-en="Failure prediction">Ramalan kerosakan</h3><p data-ms="Amaran awal untuk kelewatan pintu, pemacu, dan isyarat." data-en="Early warning for door, drive and signal faults.">Amaran awal untuk kelewatan pintu, pemacu, dan isyarat.</p></div></div>
+      <div class="cell w3 reveal d1"><div class="ico">🔮</div><div><h3 data-ms="Ramalan kerosakan" data-en="Failure prediction">Ramalan kerosakan</h3><p data-ms="Amaran awal sebelum sesuatu kerosakan menjejaskan perkhidmatan." data-en="Early warning before a fault affects service.">Amaran awal sebelum sesuatu kerosakan menjejaskan perkhidmatan.</p></div></div>
       <div class="cell w2 reveal"><div class="ico">📝</div><div><h3 data-ms="Aliran kerja laporan" data-en="Reporting workflow">Aliran kerja laporan</h3><p data-ms="Kontraktor hantar punca &amp; tindakan; pengurusan luluskan." data-en="Contractors submit root-cause &amp; action; management approves.">Kontraktor hantar punca &amp; tindakan; pengurusan luluskan.</p></div></div>
       <div class="cell w2 reveal d1"><div class="ico">⏱️</div><div><h3 data-ms="Jejak SLA" data-en="SLA tracking">Jejak SLA</h3><p data-ms="Ditepati, berisiko, atau dilanggar — setiap insiden." data-en="Met, at risk, or breached — every incident.">Ditepati, berisiko, atau dilanggar — setiap insiden.</p></div></div>
-      <div class="cell w2 reveal d2"><div class="ico">🔔</div><div><h3 data-ms="Alert Telegram" data-en="Telegram alerts">Alert Telegram</h3><p data-ms="Insiden &amp; kemas kini terus ke kumpulan pasukan." data-en="Incidents &amp; updates straight to the team group.">Insiden &amp; kemas kini terus ke kumpulan pasukan.</p></div></div>
+      <div class="cell w2 reveal d2"><div class="ico">🔔</div><div><h3 data-ms="Notifikasi segera" data-en="Instant notifications">Notifikasi segera</h3><p data-ms="Amaran insiden terus ke telefon pasukan anda." data-en="Incident alerts straight to your team's phone.">Amaran insiden terus ke telefon pasukan anda.</p></div></div>
     </div>
   </div>
 </section>
@@ -100,10 +102,10 @@
 <section class="band">
   <div class="wrap">
     <div class="stats reveal">
-      <div class="stat"><div class="num" data-count="129">0</div><div class="lbl" data-ms="Lif dipantau" data-en="Lifts monitored">Lif dipantau</div></div>
-      <div class="stat"><div class="num">24/7</div><div class="lbl" data-ms="Pemantauan masa nyata" data-en="Real-time monitoring">Pemantauan masa nyata</div></div>
-      <div class="stat"><div class="num" data-count="6">0</div><div class="lbl" data-ms="Jenis kerosakan dikesan" data-en="Failure types detected">Jenis kerosakan dikesan</div></div>
-      <div class="stat"><div class="num">&lt;<span data-count="30">0</span><small> min</small></div><div class="lbl" data-ms="Sasaran tindak balas" data-en="Response target">Sasaran tindak balas</div></div>
+      <div class="stat"><div class="num">24/7</div><div class="lbl" data-ms="Pemantauan berterusan" data-en="Continuous monitoring">Pemantauan berterusan</div></div>
+      <div class="stat"><div class="num" data-ms="Awal" data-en="Early">Awal</div><div class="lbl" data-ms="Amaran sebelum kerosakan" data-en="Warnings before failure">Amaran sebelum kerosakan</div></div>
+      <div class="stat"><div class="num" data-ms="Satu" data-en="One">Satu</div><div class="lbl" data-ms="Dashboard untuk semua lif" data-en="Dashboard for every lift">Dashboard untuk semua lif</div></div>
+      <div class="stat"><div class="num">SLA</div><div class="lbl" data-ms="Dijejak setiap insiden" data-en="Tracked on every incident">Dijejak setiap insiden</div></div>
     </div>
   </div>
 </section>
