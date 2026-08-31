@@ -109,10 +109,11 @@ a { color: inherit; text-decoration: none; }
 }
 .stage .stage-vid {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0;
-  /* scale + shift so the generator watermark in the bottom-right corner is
-     pushed outside the clipped stage */
-  transform: scale(1.18) translate(-2%, -5%);
-  transform-origin: 34% 34%;
+  /* anchor the top-left, scale up: the image grows toward the bottom-right so
+     the generator watermark there is pushed outside the clipped stage while the
+     top edge is never cropped */
+  transform: scale(1.13);
+  transform-origin: 0% 0%;
 }
 /* extra safety: fade the very bottom-right corner into the stage tint,
    covering any generator watermark that survives the crop (sits under the card) */
@@ -241,7 +242,7 @@ footer { border-top: 1px solid var(--line); padding: 28px 0; }
   /* stage: video on top, live-status card BELOW it — nothing covers the video */
   .stage-wrap { margin-top: 34px; perspective: none; }
   .stage { height: auto; aspect-ratio: 4 / 3; border-radius: 22px; }
-  .stage .stage-vid { transform: scale(1.12) translate(-3%, -4%); transform-origin: 40% 32%; }
+  .stage .stage-vid { transform: scale(1.1); transform-origin: 0% 0%; }
   .stage-wrap .mini {
     position: static; width: auto; margin: 14px 0 0;
     animation: none; opacity: 1; transform: none;

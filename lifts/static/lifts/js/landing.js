@@ -77,7 +77,7 @@
   var lift = document.getElementById("lift");           // present only in the no-video version
   var mini = document.querySelector(".mini");
   var moveEl = lift || vid;
-  var baseT = lift ? "translate(-50%, -58%) " : "scale(1.18) translate(-2%, -5%) ";
+  var baseT = lift ? "translate(-50%, -58%) " : "scale(1.13) ";
   if (stage && moveEl && !reduce && window.matchMedia("(pointer:fine)").matches) {
     stage.addEventListener("pointermove", function (e) {
       var r = stage.getBoundingClientRect();
