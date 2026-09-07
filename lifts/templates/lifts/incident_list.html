@@ -126,7 +126,7 @@
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (d) { if (d && d.sig && d.sig !== sig) location.reload(); })
           .catch(function () {});
-      }, 4000);
+      }, 3000);
     })();
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
