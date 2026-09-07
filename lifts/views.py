@@ -585,7 +585,7 @@ def handle_alert(request):
                     f"*Premise:* {lift_instance.premise_name}\n"
                     f"*Lift ID:* {lift_instance.lift_identifier}\n"
                     f"*Incident:* {incident_type}\n"
-                    f"*Time:* {incident.timestamp.strftime('%d-%b-%Y %I:%M %p')}"
+                    f"*Time:* {timezone.localtime(incident.timestamp).strftime('%d-%b-%Y %I:%M %p')}"
                 )
                 send_telegram_message(message)
                 return JsonResponse({'status': 'success', 'message': 'Incident reported'}, status=201)
@@ -605,7 +605,7 @@ def handle_alert(request):
                         f"*Premise:* {lift_instance.premise_name}\n"
                         f"*Lift ID:* {lift_instance.lift_identifier}\n"
                         f"*Incident:* {incident.incident_type}\n"
-                        f"*Time Attended:* {incident.time_attended.strftime('%d-%b-%Y %I:%M %p')}"
+                        f"*Time Attended:* {timezone.localtime(incident.time_attended).strftime('%d-%b-%Y %I:%M %p')}"
                     )
                     send_telegram_message(message)
                     return JsonResponse({'status': 'success', 'message': 'Incident status updated to Attended'}, status=200)
@@ -679,7 +679,7 @@ def submit_report_form(request, incident_id):
                 f"*Premise:* {incident.lift.premise_name}\n"
                 f"*Lift ID:* {incident.lift.lift_identifier}\n"
                 f"*Incident:* {incident.incident_type}\n"
-                f"*Submitted:* {incident.report_submitted_at.strftime('%d-%b-%Y %I:%M %p')}\n\n"
+                f"*Submitted:* {timezone.localtime(incident.report_submitted_at).strftime('%d-%b-%Y %I:%M %p')}\n\n"
                 f"Awaiting JKR review."
             )
             send_telegram_message(message)
@@ -1093,10 +1093,10 @@ def view_report_api(request, incident_id):
             "contractor": str(getattr(lift.contractor, 'name', 'N/A')),
             "incident_type": incident.incident_type or "N/A",
             "status": incident.status or "N/A",
-            "timestamp": incident.timestamp.strftime("%d %B %Y, %I:%M %p") if incident.timestamp else "N/A",
-            "time_attended": incident.time_attended.strftime("%d %B %Y, %I:%M %p") if incident.time_attended else "N/A",
-            "time_resolved": incident.time_resolved.strftime("%d %B %Y, %I:%M %p") if incident.time_resolved else "N/A",
-            "report_submitted_at": incident.report_submitted_at.strftime("%d %B %Y, %I:%M %p")
+            "timestamp": timezone.localtime(incident.timestamp).strftime("%d %B %Y, %I:%M %p") if incident.timestamp else "N/A",
+            "time_attended": timezone.localtime(incident.time_attended).strftime("%d %B %Y, %I:%M %p") if incident.time_attended else "N/A",
+            "time_resolved": timezone.localtime(incident.time_resolved).strftime("%d %B %Y, %I:%M %p") if incident.time_resolved else "N/A",
+            "report_submitted_at": timezone.localtime(incident.report_submitted_at).strftime("%d %B %Y, %I:%M %p")
                 if incident.report_submitted_at else "Not yet submitted",
 
             # 🔹 Section B: Incident Description

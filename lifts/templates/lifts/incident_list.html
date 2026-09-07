@@ -122,11 +122,11 @@
       var sig = "{{ ping_sig|escapejs }}";
       var url = "{% url 'incident_ping' %}";
       setInterval(function () {
-        fetch(url, { headers: { 'X-Requested-With': 'fetch' }, credentials: 'same-origin' })
+        fetch(url, { headers: { 'X-Requested-With': 'fetch' }, credentials: 'same-origin', cache: 'no-store' })
           .then(function (r) { return r.ok ? r.json() : null; })
           .then(function (d) { if (d && d.sig && d.sig !== sig) location.reload(); })
           .catch(function () {});
-      }, 8000);
+      }, 4000);
     })();
   </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
