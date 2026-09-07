@@ -6,7 +6,7 @@ from django.conf import settings
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.decorators import login_required
 from django.core.serializers.json import DjangoJSONEncoder
-from django.db.models import Q, F, Subquery, OuterRef
+from django.db.models import Q, F, Subquery, OuterRef, Count, Max
 from django.http import Http404
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
@@ -226,6 +226,26 @@ def lift_search(request):
     return render(request, 'lifts/lift_search.html', {'q': q, 'lifts': lifts})
 
 
+def _incident_sig():
+    """A cheap fingerprint of incident state. Changes when an incident is
+    created, attended or resolved — the dashboard polls this and reloads when it
+    moves, so a live demo updates on its own without a manual refresh."""
+    a = Incident.objects.aggregate(
+        n=Count('id'),
+        d=Count('id', filter=Q(status='Detected')),
+        r=Count('id', filter=Q(status='Resolved')),
+        t=Max('timestamp'),
+        at=Max('time_attended'),
+    )
+    return f"{a['n']}|{a['d']}|{a['r']}|{a['t']}|{a['at']}"
+
+
+@login_required
+def incident_ping(request):
+    """Tiny JSON endpoint the dashboard polls for change detection."""
+    return JsonResponse({'sig': _incident_sig()})
+
+
 @login_required
 def incident_list(request):
     incidents = Incident.objects.all().order_by('-timestamp')
@@ -278,7 +298,8 @@ def incident_list(request):
         'sla_percentage': sla_percentage,
         # 'lifts_json': lifts_json, # <-- REMOVED (No longer sending all lifts)
         'active_incidents_json': active_incidents_json, # <-- ADDED
-        'latest_active_incident_json': latest_active_incident_json, 
+        'latest_active_incident_json': latest_active_incident_json,
+        'ping_sig': _incident_sig(),
     }
     return render(request, 'lifts/incident_list.html', context)
 

@@ -116,6 +116,19 @@
 {% endblock %}
 
 {% block extra_js %}
+  <script>
+    /* auto-refresh: poll a tiny endpoint; reload only when incident state moves */
+    (function () {
+      var sig = "{{ ping_sig|escapejs }}";
+      var url = "{% url 'incident_ping' %}";
+      setInterval(function () {
+        fetch(url, { headers: { 'X-Requested-With': 'fetch' }, credentials: 'same-origin' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) { if (d && d.sig && d.sig !== sig) location.reload(); })
+          .catch(function () {});
+      }, 8000);
+    })();
+  </script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
           integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
