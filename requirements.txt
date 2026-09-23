@@ -1,4 +1,4 @@
-Django==5.2.7
+Django==5.2.17
 djangorestframework==3.16.1
 djangorestframework-simplejwt==5.5.1
 django-cors-headers==4.9.0
@@ -11,7 +11,7 @@ gunicorn==23.0.0
 whitenoise==6.8.2
 django-storages==1.14.4
 boto3==1.35.99
-PyJWT==2.10.1
+PyJWT==2.14.0
 pandas==2.3.3
 numpy==2.3.4
 scikit-learn==1.7.2
@@ -20,4 +20,4 @@ scipy==1.16.2
 joblib==1.5.2
 matplotlib==3.10.7
 requests==2.32.5
-pillow==12.0.0
+pillow==12.3.0
