@@ -13,6 +13,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 import joblib
 import json
 import numpy as np
@@ -241,12 +242,14 @@ def _incident_sig():
 
 
 @login_required
+@never_cache
 def incident_ping(request):
     """Tiny JSON endpoint the dashboard polls for change detection."""
     return JsonResponse({'sig': _incident_sig()})
 
 
 @login_required
+@never_cache
 def incident_list(request):
     incidents = Incident.objects.all().order_by('-timestamp')
 
@@ -305,6 +308,7 @@ def incident_list(request):
 
 
 @login_required
+@never_cache
 def contractor_dashboard(request):
      # (Existing contractor_dashboard logic)
     incidents = Incident.objects.all().order_by('-timestamp')
@@ -345,6 +349,7 @@ def contractor_dashboard(request):
 
 # --- Lift Health View (Alert check removed) ---
 @login_required
+@never_cache
 def lift_health_dashboard(request):
     all_lifts = Lift.objects.all().order_by('lift_identifier')
     selected_lift_id = request.GET.get('lift_id')
@@ -759,6 +764,7 @@ def view_report(request, incident_id):
 # === JKR ANALYTICS DASHBOARD ====
 # ==================================
 @login_required
+@never_cache
 def jkr_analytics_dashboard(request):
     premise_name = "JKR Bahagian Perkhidmatan Mekanikal"
     
